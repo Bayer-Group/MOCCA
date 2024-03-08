@@ -1,0 +1,8 @@
+numpy
+scipy
+scikit-learn
+pyyaml
+pandas
+
+# for tests
+matplotlib
