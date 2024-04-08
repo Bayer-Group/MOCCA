@@ -1,4 +1,4 @@
-name: Compresses and deploys example data
+name: Compress and Deploy Example Data
 
 on:
   push:
@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  compress:
+  compress-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -23,7 +23,7 @@ jobs:
       - name: Compress the data
         run: |
           mkdir compressed_data
-          for dir in src/mocca2/data/*; do
+          for dir in src/mocca2/example_data/data/*; do
             tar -cjf $dir.tar.bzip2 compresseed_data/$dir
           done
 
