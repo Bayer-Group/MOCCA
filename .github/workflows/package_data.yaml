@@ -1,0 +1,55 @@
+name: Compresses and deploys example data
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "example-data"
+  cancel-in-progress: false
+
+jobs:
+  compress:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      # Compress the data
+      - name: Compress the data
+        run: |
+          mkdir compressed_data
+          for dir in src/mocca2/data/*; do
+            tar -cjf $dir.tar.bzip2 compresseed_data/$dir
+          done
+
+      # Configure Git, Important for actions to commit
+      - name: Configure Git
+        run: |
+          git config --global user.email "jan.oboril@gmail.com"
+          git config --global user.name "Jan Oboril"
+
+      # Create new branch
+      - name: Create Branch
+        run: |
+          git branch example-data
+          git checkout example-data
+
+      # Add the compressed data file
+      - name: Add Compressed Data and Commit
+        run: |
+          git rm -rf .
+          mv compressed_data/* .
+          git add *.tar.bzip2
+          git commit -m "Compressed example data"
+
+      # Push the branch to remote
+      - name: Push Changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: example-data
