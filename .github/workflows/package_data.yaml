@@ -38,7 +38,7 @@ jobs:
       - name: Prepare Branch
         run: |
           git checkout -b example-data
-          git pull origin example-data || true
+          git pull origin example-data --rebase || true
 
 
       # Add the compressed data file
