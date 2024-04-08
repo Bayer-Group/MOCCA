@@ -38,7 +38,7 @@ jobs:
       - name: Prepare Branch
         run: |
           git checkout -b example-data
-          git pull origin example-data --rebase || true
+          git pull origin example-data --rebase|| true
 
 
       # Add the compressed data file
@@ -49,7 +49,7 @@ jobs:
           mv _temp/* .
           rmdir _temp
           git add *.tar.bz2
-          echo "# Example Data\nThese archives contain various example chromatograms. You can use them from mocca2 package using `mocca2.example_data` module after downloading them using `python -m mocca2 --download-data`.\n\nThis data is automatically generated, do not edit manually." > README.md
+          echo $"# Example Data\nThese archives contain various example chromatograms. You can use them from mocca2 package using \`mocca2.example_data\` module after downloading them using \`python -m mocca2 --download-data\`.\n\nThis data is automatically generated, do not edit manually." > README.md
           git add README.md
           git commit -m "Added compressed example data"
 
