@@ -36,7 +36,11 @@ jobs:
         run: |
           cd docs
           make html
-          cd ..
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: html-pages
+          path: _build/html
   
   # Deploy the pages
   deploy:
@@ -51,15 +55,15 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Debug
-        run: |
-          pwd
-          ls
-          ls docs/_build
+      - name: Download the pages
+        uses: actions/download-artifact@v3
+        with:
+          name: html-pages
+          path: html/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'docs/_build/html'
+          path: 'html'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
