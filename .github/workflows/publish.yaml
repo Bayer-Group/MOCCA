@@ -19,7 +19,6 @@ jobs:
         python-version: "3.10"
     - name: Install pypa/build
       run: |
-        pip install -r requirements.txt
         pip install build
     - name: Build a binary wheel and a source tarball
       run: python3 -m build
@@ -94,41 +93,3 @@ jobs:
         gh release upload
         '${{ github.ref_name }}' dist/**
         --repo '${{ github.repository }}'
-
-# CREATE A GITHUB PAGES SITE
-  release_sphinx:
-    needs:
-      - build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: Installing sphinx
-        run: |
-          pip install sphinx sphinx-rtd-theme
-
-      - name: Building the docs
-        run: |
-          cd docs
-          make html
-          cd ..
-          ls docs/_build
-
-      - name: Setup Git
-        run: |
-          git config --global user.name 'Workflow Bot'
-          git config --global user.email 'jan.oboril@gmail.com'
-
-      - name: Deploying to gh-pages branch
-        run: |
-          git checkout -b gh-pages
-          cp -r docs/_build/html .
-          git rm -r $(ls -I "html")
-          rm -r $(ls -I "html")
-          mv html/* .
-          rm -r html
-          git add .
-          git commit -m "Deploying to gh-pages"
-          git push origin gh-pages
