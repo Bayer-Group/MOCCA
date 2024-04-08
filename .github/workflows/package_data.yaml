@@ -26,7 +26,7 @@ jobs:
             tar -cjf $dir.tar.bzip2 $dir
           done
           mkdir _temp
-          mv src/mocca2/example_data/data/*.tar.bzip2 _temp/
+          mv src/mocca2/example_data/data/*.tar.bzip2 .
 
       # Configure Git, Important for actions to commit
       - name: Configure Git
@@ -34,18 +34,23 @@ jobs:
           git config --global user.email "jan.oboril@gmail.com"
           git config --global user.name "Jan Oboril"
 
-      # Create new branch
-      - name: Create Branch
+      # Check if branch exists and create or clean it
+      - name: Prepare Branch
         run: |
-          git checkout -b example-data
-
+          if git show-ref --quiet refs/heads/example-data; then
+            echo "Branch exists, checking out and cleaning."
+            git checkout example-data
+            git rm -rf . && git clean -fdx
+          else
+            echo "Branch does not exist, creating as orphan."
+            git checkout --orphan example-data
+            git reset --hard
+            git commit --allow-empty -m "Initial commit on example-data"
+          fi
       # Add the compressed data file
       - name: Add Compressed Data and Commit
         run: |
-          git pull
           git rm -rf .
-          mv _temp/* .
-          rmdir _temp
           git add *.tar.bzip2
           git commit -m "Compressed example data"
 

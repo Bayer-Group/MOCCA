@@ -1,6 +1,8 @@
 import argparse
 import tarfile
 import urllib.request
+from importlib import resources as impresources
+from mocca2 import example_data
 
 
 def download_file(url, filename):
@@ -13,8 +15,21 @@ def extract_bz2(filename, path):
 
 
 def download_data():
-    # Your code here
-    print("This is my custom command!")
+    files = ["examples", "benzaldhyde"]
+
+    directory = impresources.files(example_data).joinpath("data")
+    directory.mkdir(parents=True, exist_ok=True)
+
+    for file in files:
+        url = f"https://github.com/oboril/mocca/blob/example-data/src/mocca2/example_data/data/{file}.tar.bzip2"
+        filename = directory.joinpath(f"{file}.tar.bz2")
+
+        print(f"Downloading {file} data")
+        download_file(url, filename)
+        print(f"Extracting {file} data")
+        extract_bz2(filename, directory)
+
+    print("Done!")
 
 
 if __name__ == "__main__":
