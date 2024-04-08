@@ -6,3 +6,5 @@
 The code should be automatically published on every push to `main`.
 
 # Setting up docs
+
+To build docs locally, `pip install sphinx sphinx-rtd-theme` and then run `make html` in the `docs` directory.

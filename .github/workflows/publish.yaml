@@ -105,8 +105,8 @@ jobs:
       - name: Building documentation
         run: |
           pip install sphinx sphinx-rtd-theme
-          sphinx-apidoc --no-toc --module-first -o docs/autodoc src/stenotype
-          sphinx-build docs public -b dirhtml
+          cd docs
+          make html
 
       - name: github pages deploy
         uses: peaceiris/actions-gh-pages@v2.3.1
