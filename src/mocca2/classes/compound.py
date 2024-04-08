@@ -71,6 +71,7 @@ class Compound:
         data["__classname__"] = "Compound"
         return data
 
+    @staticmethod
     def from_dict(data: Dict[str, Any]) -> Compound:
         """Creates a Compound object from a dictionary"""
         assert data["__classname__"] == "Compound"

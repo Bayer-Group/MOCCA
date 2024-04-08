@@ -51,6 +51,7 @@ class Peak:
         """Converts the data to a dictionary for serialization"""
         return self.__dict__ | {"__classname__": "Peak"}
 
+    @staticmethod
     def from_dict(data: Dict[str, Any]) -> Peak:
         """Creates a Peak object from a dictionary"""
         assert data["__classname__"] == "Peak"

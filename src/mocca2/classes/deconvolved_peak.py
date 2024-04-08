@@ -122,6 +122,7 @@ class DeconvolvedPeak(Peak):
         data["__classname__"] = "DeconvolvedPeak"
         return data
 
+    @staticmethod
     def from_dict(data: Dict[str, Any]) -> DeconvolvedPeak:
         """Creates a DeconvolvedPeak object from a dictionary"""
         assert data["__classname__"] == "DeconvolvedPeak"

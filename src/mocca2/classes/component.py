@@ -54,6 +54,7 @@ class Component:
         data["__classname__"] = "Component"
         return data
 
+    @staticmethod
     def from_dict(data: Dict[str, Any]) -> Component:
         """Creates a Component object from a dictionary"""
         assert data["__classname__"] == "Component"

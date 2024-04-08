@@ -233,6 +233,7 @@ class Data2D:
         }
         return dic
 
+    @staticmethod
     def from_dict(data: Dict[str, Any]) -> Data2D:
         """Creates a Data2D object from a dictionary"""
         assert data["__classname__"] == "Data2D"

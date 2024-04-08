@@ -452,6 +452,7 @@ class Chromatogram(Data2D):
         data["__classname__"] = "Chromatogram"
         return data
 
+    @staticmethod
     def from_dict(data: Dict[str, Any]) -> Chromatogram:
         """Creates a Chromatogram object from a dictionary"""
         assert data["__classname__"] == "Chromatogram"
