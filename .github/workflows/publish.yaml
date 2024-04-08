@@ -101,16 +101,22 @@ jobs:
       - build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - name: Building documentation
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Installing sphinx
         run: |
           pip install sphinx sphinx-rtd-theme
+      - name: Building the docs
           cd docs
           make html
-
-      - name: github pages deploy
-        uses: peaceiris/actions-gh-pages@v2.3.1
-        env:
-          PERSONAL_TOKEN: ${{ secrets.PAT }}
-          PUBLISH_BRANCH: gh-pages
-          PUBLISH_DIR: public
+          cd ..
+      - name: Deploying to gh-pages branch
+        run: |
+          git checkout -b gh-pages
+          mv docs/_build/html .
+          git rm -r *
+          mv html/* .
+          git add .
+          git commit -m "Deploying to gh-pages"
+          git push origin gh-pages
