@@ -35,8 +35,7 @@ jobs:
       # Create new branch
       - name: Create Branch
         run: |
-          git branch example-data
-          git checkout example-data
+          git chekcout -b example-data
 
       # Add the compressed data file
       - name: Add Compressed Data and Commit
