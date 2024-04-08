@@ -1,6 +1,6 @@
 [![PyPI](https://img.shields.io/pypi/v/mocca2.svg)](https://pypi.org/project/mocca2/)
 ![pytest](https://github.com/oboril/mocca/actions/workflows/ci.yaml/badge.svg)
-[![Docs Pages](https://github.com/oboril/mocca/actions/workflows/deploy_pages.yaml/badge.svg)](https://github.com/oboril/mocca/actions/workflows/deploy_pages.yaml)
+[![Docs Pages](https://github.com/oboril/mocca/actions/workflows/deploy_pages.yaml/badge.svg)](https://oboril.github.io/mocca/)
 
 # Welcome to MOCCA2
 
