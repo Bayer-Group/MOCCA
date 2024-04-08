@@ -18,11 +18,9 @@ jobs:
       with:
         python-version: "3.10"
     - name: Install pypa/build
-      run: >-
-        python3 -m
-        pip install
-        build
-        --user
+      run: |
+        pip install -r requirements.txt
+        pip install build
     - name: Build a binary wheel and a source tarball
       run: python3 -m build
     - name: Store the distribution packages
@@ -99,34 +97,20 @@ jobs:
 
 # CREATE A GITHUB PAGES SITE
   release_sphinx:
-    needs: [build]
+    needs:
+      - build
     runs-on: ubuntu-latest
-    container:
-      image: python:3.10
-      volumes:
-        - public:public
     steps:
-
-      # check out sources that will be used for autodocs, plus readme
       - uses: actions/checkout@v1
       - name: Building documentation
         run: |
-          pip install -r requirements.txt
           pip install sphinx sphinx-rtd-theme
           sphinx-apidoc --no-toc --module-first -o docs/autodoc src/stenotype
           sphinx-build docs public -b dirhtml
 
-      # still need to build and set the PAT to get a rebuild on the pages job,
-      # apart from that quite clean and nice 
       - name: github pages deploy
         uses: peaceiris/actions-gh-pages@v2.3.1
         env:
           PERSONAL_TOKEN: ${{ secrets.PAT }}
           PUBLISH_BRANCH: gh-pages
           PUBLISH_DIR: public
-
-      # since gh-pages has a history, this step might no longer be necessary.
-      - uses: actions/upload-artifact@v1
-        with:
-          name: documentation
-          path: public
