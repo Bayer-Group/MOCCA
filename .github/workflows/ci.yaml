@@ -25,6 +25,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest
         pip install .
+        python -m mocca2 --download-data
 
     - name: Test with pytest
       run: |
