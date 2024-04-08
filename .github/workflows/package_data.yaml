@@ -50,6 +50,7 @@ jobs:
           rmdir _temp
           git add *.tar.bz2
           echo "# Example Data\nThese archives contain various example chromatograms. You can use them from mocca2 package using `mocca2.example_data` module after downloading them using `python -m mocca2 --download-data`.\n\nThis data is automatically generated, do not edit manually." > README.md
+          git add README.md
           git commit -m "Added compressed example data"
 
       # Push the branch to remote
