@@ -108,6 +108,7 @@ jobs:
         run: |
           pip install sphinx sphinx-rtd-theme
       - name: Building the docs
+        run: |
           cd docs
           make html
           cd ..
