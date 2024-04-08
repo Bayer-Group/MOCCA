@@ -23,10 +23,10 @@ jobs:
       - name: Compress the data
         run: |
           for dir in src/mocca2/example_data/data/*; do
-            tar -cjf $dir.tar.bzip2 $dir
+            tar -cjf $dir.tar.bz2 $dir
           done
           mkdir _temp
-          mv src/mocca2/example_data/data/*.tar.bzip2 _temp
+          mv src/mocca2/example_data/data/*.tar.bz2 _temp/
 
       # Configure Git, Important for actions to commit
       - name: Configure Git
@@ -47,8 +47,8 @@ jobs:
           git rm -rf . && git clean -fdx
           mv _temp/* .
           rmdir _temp
-          git add *.tar.bzip2
-          git commit -m "Compressed example data"
+          git add *.tar.bz2
+          git commit -m "Added compressed example data"
 
       # Push the branch to remote
       - name: Push Changes
