@@ -1,4 +1,5 @@
-name: Compress and Deploy Example Data
+# Compress and deploy example data
+name: Example Data
 
 on:
   push:
