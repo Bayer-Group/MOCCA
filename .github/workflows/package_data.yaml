@@ -25,7 +25,8 @@ jobs:
           for dir in src/mocca2/example_data/data/*; do
             tar -cjf $dir.tar.bzip2 $dir
           done
-          mv src/mocca2/example_data/data/*.tar.bzip2 .
+          mkdir _temp
+          mv src/mocca2/example_data/data/*.tar.bzip2 _temp/
 
       # Configure Git, Important for actions to commit
       - name: Configure Git
@@ -43,6 +44,8 @@ jobs:
         run: |
           git pull
           git rm -rf .
+          mv _temp/* .
+          rmdir _temp
           git add *.tar.bzip2
           git commit -m "Compressed example data"
 
