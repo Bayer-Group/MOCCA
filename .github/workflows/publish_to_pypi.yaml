@@ -74,24 +74,15 @@ jobs:
         inputs: >-
           ./dist/*.tar.gz
           ./dist/*.whl
-    - name: Check if Tag Exists
-      id: check_tag
-      run: |
-        if git rev-parse ${{ github.ref_name }} >/dev/null 2>&1; then
-          echo "::set-output name=exists::true"
-        else
-          echo "::set-output name=exists::false"
-        fi
-
-    - name: Create GitHub Release
-      if: steps.check_tag.outputs.exists == 'false'
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      run: >-
-        gh release create
-        '${{ github.ref_name }}'
-        --repo '${{ github.repository }}'
-        --notes ""
+    # - name: Create GitHub Release
+    #   if: steps.check_tag.outputs.exists == 'false'
+    #   env:
+    #     GITHUB_TOKEN: ${{ github.token }}
+    #   run: >-
+    #     gh release create
+    #     '${{ github.ref_name }}'
+    #     --repo '${{ github.repository }}'
+    #     --notes ""
     - name: Upload artifact signatures to GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
