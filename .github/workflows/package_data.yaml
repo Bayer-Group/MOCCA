@@ -25,6 +25,7 @@ jobs:
           for dir in src/mocca2/example_data/data/*; do
             tar -cjf $dir.tar.bzip2 $dir
           done
+          mv src/mocca2/example_data/data/*.tar.bzip2 .
 
       # Configure Git, Important for actions to commit
       - name: Configure Git
