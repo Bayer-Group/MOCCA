@@ -22,9 +22,8 @@ jobs:
       # Compress the data
       - name: Compress the data
         run: |
-          mkdir compressed_data
           for dir in src/mocca2/example_data/data/*; do
-            tar -cjf compressed_data/$dir.tar.bzip2 $dir
+            tar -cjf $dir.tar.bzip2 $dir
           done
 
       # Configure Git, Important for actions to commit
@@ -43,7 +42,6 @@ jobs:
       - name: Add Compressed Data and Commit
         run: |
           git rm -rf .
-          mv compressed_data/* .
           git add *.tar.bzip2
           git commit -m "Compressed example data"
 
