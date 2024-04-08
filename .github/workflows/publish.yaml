@@ -119,7 +119,7 @@ jobs:
           cp -r docs/_build/html .
           echo "MOVED HTML"
           ls
-          git rm -r *
+          git rm -r $(ls -I "html")
           echo "REMOVED OLD FILES"
           ls
           mv html/* .
@@ -128,6 +128,6 @@ jobs:
           rmdir html
           echo "REMOVED EMPTY DIR"
           ls
-          git add *
+          git add .
           git commit -m "Deploying to gh-pages"
           git push origin gh-pages
