@@ -112,12 +112,14 @@ jobs:
           cd docs
           make html
           cd ..
+          ls docs/_build
       - name: Deploying to gh-pages branch
         run: |
           git checkout -b gh-pages
           mv docs/_build/html .
           git rm -r *
           mv html/* .
-          git add .
+          rmdir html
+          git add *
           git commit -m "Deploying to gh-pages"
           git push origin gh-pages
