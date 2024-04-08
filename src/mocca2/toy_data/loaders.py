@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Dict, List, Tuple
 
 from importlib import resources as impresources
 import os
@@ -236,3 +236,58 @@ def knoevenagel(which: Literal["ba_ome", "ba_ome_nme2"]) -> pd.DataFrame:
     df["time"] -= start_time
 
     return df
+
+
+def cyanation() -> Dict[str, Chromatogram | List[Chromatogram]]:
+    """
+    Loads the chromatograms from the cyanation reaction, published in 10.1021/acscentsci.2c01042.
+
+    The entries are:
+    - istd: chromatogram with just the internal standard
+    - educt_1 and educt_2: standards of the starting material
+    - product_1 and product_2: standards of the product
+    - cn_source_a and cn_source_d: standards of the cyanation source a nad d (standards for other sources are not included)
+    - reactions: list of 96 all reactions
+    """
+
+    directory = str(impresources.files(toy_data) / "data/cyanation")
+
+    def filename(name: str) -> str:
+        return os.path.join(directory, f"09072021_{name}.txt")
+
+    # load all the chromatograms
+    chromatograms = {}
+
+    blank = Chromatogram(filename("gradient_97"))
+
+    chromatograms["istd"] = Chromatogram(filename("istd_96"), blank)
+    chromatograms["educt_1"] = Chromatogram(filename("educt_88"), blank)
+    chromatograms["educt_2"] = Chromatogram(filename("educt_89"), blank)
+    chromatograms["product_1"] = Chromatogram(filename("product_92"), blank)
+    chromatograms["product_2"] = Chromatogram(filename("product_93"), blank)
+    chromatograms["cn_source_a"] = Chromatogram(filename("cnsource_a_98"), blank)
+    chromatograms["cn_source_d"] = Chromatogram(filename("cnsource_d_99"), blank)
+
+    chromatograms["reactions"] = []
+    for i in range(84):
+        chromatograms["reactions"].append(
+            Chromatogram(filename(f"sample_{i+4:d}"), blank)
+        )
+
+    return chromatograms
+
+
+def benzaldehyde() -> Tuple[Chromatogram, Chromatogram]:
+    """Loads tutorial data published with the original MOCCA package, these contain 1mM and 0.5mM benzaldehyde respectively."""
+
+    directory = str(impresources.files(toy_data) / "data/benzaldehyde")
+
+    blank = Chromatogram(os.path.join(directory, "blank.D"))
+    chrom_1 = Chromatogram(
+        os.path.join(directory, "ba_1.D"), blank, interpolate_blank=True
+    )
+    chrom_2 = Chromatogram(
+        os.path.join(directory, "ba_05.D"), blank, interpolate_blank=True
+    )
+
+    return chrom_1, chrom_2
