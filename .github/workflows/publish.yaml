@@ -1,0 +1,142 @@
+name: Publish Python distribution to PyPI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+# BUILD THE DISTRIBUTION PACKAGES
+  build:
+    name: Build distribution
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+    - name: Install pypa/build
+      run: >-
+        python3 -m
+        pip install
+        build
+        --user
+    - name: Build a binary wheel and a source tarball
+      run: python3 -m build
+    - name: Store the distribution packages
+      uses: actions/upload-artifact@v3
+      with:
+        name: python-package-distributions
+        path: dist/
+
+# PUBLISH TO PYPI
+  publish-to-pypi:
+    name: >-
+      Publish Python distribution to PyPI
+    if: startsWith(github.ref, 'refs/tags/')  # only publish to PyPI on tag pushes
+    needs:
+    - build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/test_project_oboril
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v3
+      with:
+        name: python-package-distributions
+        path: dist/
+    - name: Publish distribution to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+
+# SIGN AND UPLOAD TO GITHUB RELEASE
+  github-release:
+    name: >-
+      Sign the Python distribution with Sigstore
+      and upload them to GitHub Release
+    needs:
+    - publish-to-pypi
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # IMPORTANT: mandatory for making GitHub Releases
+      id-token: write  # IMPORTANT: mandatory for sigstore
+
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v3
+      with:
+        name: python-package-distributions
+        path: dist/
+    - name: Sign the dists with Sigstore
+      uses: sigstore/gh-action-sigstore-python@v1.2.3
+      with:
+        inputs: >-
+          ./dist/*.tar.gz
+          ./dist/*.whl
+    - name: Create GitHub Release
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: >-
+        gh release create
+        '${{ github.ref_name }}'
+        --repo '${{ github.repository }}'
+        --notes ""
+    - name: Upload artifact signatures to GitHub Release
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      # Upload to GitHub Release using the `gh` CLI.
+      # `dist/` contains the built packages, and the
+      # sigstore-produced signatures and certificates.
+      run: >-
+        gh release upload
+        '${{ github.ref_name }}' dist/**
+        --repo '${{ github.repository }}'
+
+# CREATE A GITHUB PAGES SITE
+  release_sphinx:
+    needs: [build]
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.10
+      volumes:
+        - dist:dist
+        - public:public
+    steps:
+
+      # check out sources that will be used for autodocs, plus readme
+      - uses: actions/checkout@v1
+
+      # download wheel that was build and uploaded in the build step
+      - uses: actions/download-artifact@v1
+        with:
+          name: distributions
+          path: dist
+
+      # didn't need to change anything here, but had to add sphinx.ext.githubpages
+      # to my conf.py extensions list. that fixes the broken uploads
+      - name: Building documentation
+        run: |
+          pip install dist/*.whl
+          pip install sphinx sphinx-rtd-theme
+          sphinx-apidoc --no-toc --module-first -o docs/autodoc src/stenotype
+          sphinx-build docs public -b dirhtml
+
+      # still need to build and set the PAT to get a rebuild on the pages job,
+      # apart from that quite clean and nice 
+      - name: github pages deploy
+        uses: peaceiris/actions-gh-pages@v2.3.1
+        env:
+          PERSONAL_TOKEN: ${{ secrets.PAT }}
+          PUBLISH_BRANCH: gh-pages
+          PUBLISH_DIR: public
+
+      # since gh-pages has a history, this step might no longer be necessary.
+      - uses: actions/upload-artifact@v1
+        with:
+          name: documentation
+          path: public

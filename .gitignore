@@ -1,5 +1,3 @@
-__pycache__
-.mypy_cache
-_build
-\.idea
-\.ipynb_checkpoints
+venv
+**__pycache__
+docs/build
