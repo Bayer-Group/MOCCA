@@ -15,13 +15,13 @@ def extract_bz2(filename, path):
 
 
 def download_data():
-    files = ["examples", "benzaldhyde"]
+    files = ["examples", "benzaldehyde", "diterpene_esters", "knoevenagel", "cyanation"]
 
     directory = impresources.files(example_data).joinpath("data")
     directory.mkdir(parents=True, exist_ok=True)
 
     for file in files:
-        url = f"https://raw.githubusercontent.com/oboril/mocca/blob/example-data/src/mocca2/example_data/data/{file}.tar.bzip2"
+        url = f"https://github.com/oboril/mocca/raw/example-data/src/mocca2/example_data/data/{file}.tar.bzip2"
         filename = directory.joinpath(f"{file}.tar.bz2")
 
         print(f"Downloading {file} data to {filename}")
