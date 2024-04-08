@@ -117,9 +117,17 @@ jobs:
         run: |
           git checkout -b gh-pages
           mv docs/_build/html .
+          echo "MOVED HTML"
+          ls
           git rm -r *
+          echo "REMOVED OLD FILES"
+          ls
           mv html/* .
+          echo "UNPACKED HTML"
+          ls
           rmdir html
+          echo "REMOVED EMPTY DIR"
+          ls
           git add *
           git commit -m "Deploying to gh-pages"
           git push origin gh-pages
