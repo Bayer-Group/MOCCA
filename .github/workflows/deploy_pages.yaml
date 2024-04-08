@@ -27,16 +27,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Sphinx
+      - name: Install Dependencies
         run: |
+          pip install -r requirements.txt
           pip install sphinx sphinx-rtd-theme
 
       - name: Build the docs
         run: |
           cd docs
           make html
-          cd ..
-          ls docs/_build
   
   # Deploy the pages
   deploy:
