@@ -116,7 +116,7 @@ jobs:
       - name: Deploying to gh-pages branch
         run: |
           git checkout -b gh-pages
-          mv docs/_build/html .
+          cp -r docs/_build/html .
           echo "MOVED HTML"
           ls
           git rm -r *
