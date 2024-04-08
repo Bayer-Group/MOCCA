@@ -11,12 +11,23 @@ from mocca2.classes.chromatogram import Chromatogram, Data2D
 from mocca2 import example_data
 
 
+def check_data_needs_downloading():
+    """
+    Check if the example data needs to be downloaded.
+    """
+    if not impresources.is_resource(example_data, "data"):
+        raise FileNotFoundError(
+            "Example data not found. Please run 'python -m mocca2 --download-data' to download the example data."
+        )
+
+
 def example_1() -> Chromatogram:
     """
     Loads example chromatogram.
 
     Key features are large peak at 2.4 min and three overlapping peaks around 1.5 min.
     """
+    check_data_needs_downloading()
 
     chrom = impresources.files(example_data) / "data/examples/chrom1.arw"
     blank = impresources.files(example_data) / "data/examples/blank1.arw"
@@ -30,6 +41,7 @@ def example_2() -> Chromatogram:
 
     Rather complicated chromatogram with many peaks around 1.5 - 2.5 min, as well as strong peak at 0.2 min and broad peak at 3.5 min.
     """
+    check_data_needs_downloading()
 
     chrom = impresources.files(example_data) / "data/examples/chrom2.arw"
     blank = impresources.files(example_data) / "data/examples/blank2.arw"
@@ -43,6 +55,7 @@ def example_3() -> Chromatogram:
 
     Simple chromatogram with 4 pure peaks in the first 1 minute.
     """
+    check_data_needs_downloading()
 
     chrom = impresources.files(example_data) / "data/examples/chrom3.arw"
     blank = impresources.files(example_data) / "data/examples/blank3.arw"
@@ -60,6 +73,8 @@ def knoevenagel_calibration(which: Literal["1", "2", "both"] = "both") -> pd.Dat
     - grad_len: gradient length (in minutes)
     - chromatogram: the chromatogram object
     """
+    check_data_needs_downloading()
+
     if which == "both":
         return pd.concat(
             [knoevenagel_calibration(which="1"), knoevenagel_calibration(which="2")]
@@ -156,6 +171,7 @@ def knoevenagel(which: Literal["ba_ome", "ba_ome_nme2"]) -> pd.DataFrame:
     - time: reaction time in minutes
     - chromatogram: the chromatogram object
     """
+    check_data_needs_downloading()
 
     if which not in ["ba_ome", "ba_ome_nme2"]:
         raise ValueError("which must be one of 'ba_ome', 'ba_ome_nme2'")
@@ -252,6 +268,7 @@ def cyanation() -> Dict[str, Chromatogram | List[Chromatogram]]:
     - cn_source_a and cn_source_d: standards of the cyanation source a nad d (standards for other sources are not included)
     - reactions: list of 96 all reactions
     """
+    check_data_needs_downloading()
 
     directory = str(impresources.files(example_data) / "data/cyanation")
 
@@ -282,6 +299,7 @@ def cyanation() -> Dict[str, Chromatogram | List[Chromatogram]]:
 
 def benzaldehyde() -> Tuple[Chromatogram, Chromatogram]:
     """Loads tutorial data published with the original MOCCA package, these contain 1mM and 0.5mM benzaldehyde respectively."""
+    check_data_needs_downloading()
 
     directory = str(impresources.files(example_data) / "data/benzaldehyde")
 
@@ -307,6 +325,8 @@ def diterpene_esters() -> pd.DataFrame:
     - KO, CO, KP, CP: known concentrations of the compounds
     - chromatogram: Data2D objects with chromatograms
     """
+    check_data_needs_downloading()
+
     directory = str(impresources.files(example_data) / "data/diterpene_esters")
 
     mat = scipy.io.loadmat(os.path.join(directory, "data.mat"))
