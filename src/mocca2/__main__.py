@@ -1,4 +1,15 @@
 import argparse
+import tarfile
+import urllib.request
+
+
+def download_file(url, filename):
+    urllib.request.urlretrieve(url, filename)
+
+
+def extract_bz2(filename, path):
+    with tarfile.open(filename, "r:bz2") as tar:
+        tar.extractall(path)
 
 
 def download_data():

@@ -41,6 +41,7 @@ jobs:
       # Add the compressed data file
       - name: Add Compressed Data and Commit
         run: |
+          git pull
           git rm -rf .
           git add *.tar.bzip2
           git commit -m "Compressed example data"
