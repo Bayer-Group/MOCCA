@@ -125,8 +125,8 @@ jobs:
         run: |
           git checkout -b gh-pages
           cp -r docs/_build/html .
-          git rm -r $(ls -a -I "html")
-          rm -r $(ls -a -I "html")
+          git rm -r $(ls -a -I "html" -I ".." -I ".")
+          rm -r $(ls -a -I "html" -I ".." -I ".")
           mv html/* .
           rm -r html
           git add .
