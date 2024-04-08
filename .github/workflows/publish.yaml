@@ -120,12 +120,13 @@ jobs:
           echo "MOVED HTML"
           ls
           git rm -r $(ls -I "html")
+          rm -r $(ls -I "html")
           echo "REMOVED OLD FILES"
           ls
           mv html/* .
           echo "UNPACKED HTML"
           ls
-          rmdir html
+          rm -r html
           echo "REMOVED EMPTY DIR"
           ls
           git add .
