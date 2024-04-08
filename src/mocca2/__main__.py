@@ -21,10 +21,10 @@ def download_data():
     directory.mkdir(parents=True, exist_ok=True)
 
     for file in files:
-        url = f"https://github.com/oboril/mocca/blob/example-data/src/mocca2/example_data/data/{file}.tar.bzip2"
+        url = f"https://raw.githubusercontent.com/oboril/mocca/blob/example-data/src/mocca2/example_data/data/{file}.tar.bzip2"
         filename = directory.joinpath(f"{file}.tar.bz2")
 
-        print(f"Downloading {file} data")
+        print(f"Downloading {file} data to {filename}")
         download_file(url, filename)
         print(f"Extracting {file} data")
         extract_bz2(filename, directory)
