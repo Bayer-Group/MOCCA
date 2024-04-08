@@ -56,5 +56,8 @@ def test_dict_serialization():
     chrom_dict = chrom.to_dict()
     chrom2 = mocca2.classes.chromatogram.Chromatogram.from_dict(chrom_dict)
 
+    print(chrom_dict)
+    print(chrom2.to_dict())
+
     assert deep_equal(chrom, chrom2)
     assert deep_equal(chrom_dict, chrom2.to_dict())

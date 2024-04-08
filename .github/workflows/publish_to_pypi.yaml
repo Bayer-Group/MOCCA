@@ -2,8 +2,7 @@ name: Publish Python distribution to PyPI
 
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
