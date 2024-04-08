@@ -104,24 +104,14 @@ jobs:
     container:
       image: python:3.10
       volumes:
-        - dist:dist
         - public:public
     steps:
 
       # check out sources that will be used for autodocs, plus readme
       - uses: actions/checkout@v1
-
-      # download wheel that was build and uploaded in the build step
-      - uses: actions/download-artifact@v1
-        with:
-          name: distributions
-          path: dist
-
-      # didn't need to change anything here, but had to add sphinx.ext.githubpages
-      # to my conf.py extensions list. that fixes the broken uploads
       - name: Building documentation
         run: |
-          pip install dist/*.whl
+          pip install -r requirements.txt
           pip install sphinx sphinx-rtd-theme
           sphinx-apidoc --no-toc --module-first -o docs/autodoc src/stenotype
           sphinx-build docs public -b dirhtml
