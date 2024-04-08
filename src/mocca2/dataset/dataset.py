@@ -1,10 +1,11 @@
 """The class Dataset provides very high-level interface for processing sets of chromatograms"""
 
+from __future__ import annotations
 from typing import Dict, Tuple, Any, List
 from numpy.typing import NDArray
 from copy import deepcopy
 
-import pandas as pd # type: ignore
+import pandas as pd  # type: ignore
 import numpy as np
 
 from mocca2.classes.chromatogram import Chromatogram
@@ -13,7 +14,7 @@ from mocca2.classes import Compound, Component
 from mocca2.dataset.settings import ProcessingSettings
 from mocca2.clustering.cluster_components import cluster_components
 from mocca2.math import cosine_similarity
-from mocca2.deconvolution.fit_peak_model import fit_peak_model
+
 
 class MoccaDataset:
     """Collection of chromatograms, compounds, and other information"""
@@ -58,7 +59,7 @@ class MoccaDataset:
         istd_concentration: float | None = None,
         reference_for_compound: str | None = None,
         compound_concentration: float | None = None,
-        istd_reference: bool = False
+        istd_reference: bool = False,
     ) -> int:
         """
         Adds chromatogram to the dataset, returns the assigned ID
@@ -79,7 +80,7 @@ class MoccaDataset:
             if this chromatogram contains compound reference with known concentration, specify concentration
 
         istd_reference: bool = False
-            specify whether this chromatogram is reference for internal standard 
+            specify whether this chromatogram is reference for internal standard
 
         """
 
@@ -90,9 +91,12 @@ class MoccaDataset:
 
         # check that the sampling is same as in existing chromatograms
         if len(self.chromatograms) > 0:
-            if not next(iter(self._raw_2d_data.values())).check_same_sampling(chromatogram):
+            if not next(iter(self._raw_2d_data.values())).check_same_sampling(
+                chromatogram
+            ):
                 raise Exception(
-                    "Cannot add this chromatogram to the campaign, because the time or wavelength points are different")
+                    "Cannot add this chromatogram to the campaign, because the time or wavelength points are different"
+                )
 
         # Save all data
         self.chromatograms[new_id] = chromatogram
@@ -104,7 +108,9 @@ class MoccaDataset:
 
         if reference_for_compound is not None:
             self.compound_references[new_id] = (
-                reference_for_compound, compound_concentration)
+                reference_for_compound,
+                compound_concentration,
+            )
 
         if istd_reference:
             self._istd_chromatogram = new_id
@@ -126,7 +132,7 @@ class MoccaDataset:
 
         wavelength = next(iter(self.chromatograms.values())).wavelength
         return wavelength
-    
+
     def wavelength_raw(self) -> NDArray | None:
         """Returns wavelength axis of the raw data (without cropping), if there are any"""
         if len(self._raw_2d_data) == 0:
@@ -170,7 +176,9 @@ class MoccaDataset:
     def _name_compounds(self):
         """Gives default name to all compounds and assigns concentration conversion factors to compounds"""
 
-        def name_main_compound_in_chromatogram(chromatogram_id: int, name: str, conc: float | None) -> int | None:
+        def name_main_compound_in_chromatogram(
+            chromatogram_id: int, name: str, conc: float | None
+        ) -> int | None:
             chromatogram = self.chromatograms[chromatogram_id]
             components = chromatogram.all_components(sort_by=lambda c: -c.integral)
 
@@ -191,15 +199,28 @@ class MoccaDataset:
                     # Absolute concentration factor
                     compound.concentration_factor = conc / integral
                     # Relative concentration factor
-                    if self.istd_compound is not None and chromatogram_id in self.istd_concentrations:
-                        istd_integral = sum([c.integral for c in chromatogram.all_components() if c.compound_id == self.istd_compound])
+                    if (
+                        self.istd_compound is not None
+                        and chromatogram_id in self.istd_concentrations
+                    ):
+                        istd_integral = sum(
+                            [
+                                c.integral
+                                for c in chromatogram.all_components()
+                                if c.compound_id == self.istd_compound
+                            ]
+                        )
                         if istd_integral > 0:
                             istd_conc = self.istd_concentrations[chromatogram_id]
                             integral = component.integral
 
-                            compound.concentration_factor_vs_istd = conc / integral * istd_integral / istd_conc
+                            compound.concentration_factor_vs_istd = (
+                                conc / integral * istd_integral / istd_conc
+                            )
 
-                            print(f"Compound {compound.name} has conc factor vs ISTD {compound.concentration_factor_vs_istd:0.3f}")
+                            print(
+                                f"Compound {compound.name} has conc factor vs ISTD {compound.concentration_factor_vs_istd:0.3f}"
+                            )
 
                 return component.compound_id
             return None
@@ -219,7 +240,8 @@ class MoccaDataset:
         if self.istd_chromatogram is not None:
             name, conc = self.compound_references[self.istd_chromatogram]
             istd_id = name_main_compound_in_chromatogram(
-                self.istd_chromatogram, name, conc)
+                self.istd_chromatogram, name, conc
+            )
             self.istd_compound = istd_id
 
         # Set names and conversion factors for known compounds
@@ -238,7 +260,7 @@ class MoccaDataset:
             if compound.name is None:
                 compound.name = f"@ {self.time()[compound.elution_time]:0.3f}"
 
-    def process_all(self, settings: ProcessingSettings, verbose:bool = True):
+    def process_all(self, settings: ProcessingSettings, verbose: bool = True):
         """Processes all chromatograms: finds and deconvolves peaks, creates averaged compounds, and refines peaks"""
         self.settings = settings
 
@@ -251,7 +273,9 @@ class MoccaDataset:
             print("Cropping wavelengths")
         # Cropping wavelengths
         for idx, raw in self._raw_2d_data.items():
-            cropped = raw.extract_wavelength(settings.min_wavelength, settings.max_wavelength)
+            cropped = raw.extract_wavelength(
+                settings.min_wavelength, settings.max_wavelength
+            )
             self.chromatograms[idx].data = cropped.data
             self.chromatograms[idx].time = cropped.time
             self.chromatograms[idx].wavelength = cropped.wavelength
@@ -263,7 +287,7 @@ class MoccaDataset:
             chromatogram.correct_baseline(
                 method=settings.baseline_model,
                 smoothness=settings.baseline_smoothness,
-                smooth_wl=max(len(self.wavelength())//20, 4) # type: ignore
+                smooth_wl=max(len(self.wavelength()) // 20, 4),  # type: ignore
             )
 
         if verbose:
@@ -276,7 +300,7 @@ class MoccaDataset:
                 width_at=settings.border_max_peak_cutoff,
                 split_threshold=settings.split_threshold,
                 min_elution_time=settings.min_elution_time,
-                max_elution_time=settings.max_elution_time
+                max_elution_time=settings.max_elution_time,
             )
 
         if verbose:
@@ -289,7 +313,7 @@ class MoccaDataset:
                 model=settings.peak_model,
                 min_r2=settings.explained_threshold,
                 relaxe_concs=settings.relaxe_concs,
-                max_comps=settings.max_peak_comps
+                max_comps=settings.max_peak_comps,
             )
 
         if verbose:
@@ -306,24 +330,44 @@ class MoccaDataset:
 
         def are_same_compound(comp1: Component, comp2: Component) -> bool:
             # estimate peak width
-            pw1 = np.sum(np.clip(comp1.concentration - np.max(comp1.concentration)/2, 0, np.inf) > 0)/2
-            pw2 = np.sum(np.clip(comp2.concentration - np.max(comp2.concentration)/2, 0, np.inf) > 0)/2
-            max_peak_dist = pw1+pw2
+            pw1 = (
+                np.sum(
+                    np.clip(
+                        comp1.concentration - np.max(comp1.concentration) / 2, 0, np.inf
+                    )
+                    > 0
+                )
+                / 2
+            )
+            pw2 = (
+                np.sum(
+                    np.clip(
+                        comp2.concentration - np.max(comp2.concentration) / 2, 0, np.inf
+                    )
+                    > 0
+                )
+                / 2
+            )
+            max_peak_dist = pw1 + pw2
 
-            if abs(comp1.elution_time - comp2.elution_time) > max_peak_dist * settings.max_peak_distance:
+            if (
+                abs(comp1.elution_time - comp2.elution_time)
+                > max_peak_dist * settings.max_peak_distance
+            ):
                 return False
-            if cosine_similarity(comp1.spectrum, comp2.spectrum) < settings.min_spectrum_correl:
+            if (
+                cosine_similarity(comp1.spectrum, comp2.spectrum)
+                < settings.min_spectrum_correl
+            ):
                 return False
 
             return True
-        
+
         def importance(comp: Component) -> float:
-            return comp.integral * comp.peak_fraction ** 4
+            return comp.integral * comp.peak_fraction**4
 
         self.compounds = cluster_components(
-            components,
-            are_same=are_same_compound,
-            weights=importance
+            components, are_same=are_same_compound, weights=importance
         )
 
         if verbose:
@@ -335,7 +379,7 @@ class MoccaDataset:
                 settings.peak_model,
                 settings.relaxe_concs,
                 settings.explained_threshold,
-                settings.min_rel_integral
+                settings.min_rel_integral,
             )
 
         if verbose:
@@ -345,11 +389,13 @@ class MoccaDataset:
         for chromatogram in self.chromatograms.values():
             for component in chromatogram.all_components():
                 present.add(component.compound_id)
-        self.compounds = {id: compound for id, compound in self.compounds.items() if id in present}
+        self.compounds = {
+            id: compound for id, compound in self.compounds.items() if id in present
+        }
 
         # Name all compounds
         self._name_compounds()
-        
+
         if verbose:
             print("Processing finished!")
 
@@ -376,24 +422,30 @@ class MoccaDataset:
 
         columns = [
             list(self.chromatograms.keys()),
-            [chrom.name for chrom in self.chromatograms.values()]
+            [chrom.name for chrom in self.chromatograms.values()],
         ]
 
-        column_names = ['Chromatogram ID', 'Chromatogram']
+        column_names = ["Chromatogram ID", "Chromatogram"]
 
-        area_percents = [chrom.get_area_percent(wl_idx) for chrom in self.chromatograms.values()]
+        area_percents = [
+            chrom.get_area_percent(wl_idx) for chrom in self.chromatograms.values()
+        ]
 
-        compound_ids = sorted(self.compounds.keys(), key=lambda c_id: self.compounds[c_id].elution_time)
+        compound_ids = sorted(
+            self.compounds.keys(), key=lambda c_id: self.compounds[c_id].elution_time
+        )
 
         for c_id in compound_ids:
             name = self.compounds[c_id].name
-            column_names.append(name) # type: ignore
-            columns.append([None if c_id not in ap else ap[c_id] for ap in area_percents])
+            column_names.append(name)  # type: ignore
+            columns.append(
+                [None if c_id not in ap else ap[c_id] for ap in area_percents]
+            )
 
-        df = pd.DataFrame(zip(*columns), columns=column_names) # type: ignore
+        df = pd.DataFrame(zip(*columns), columns=column_names)  # type: ignore
 
         return df, compound_ids
-    
+
     def get_concentrations(self) -> Tuple[pd.DataFrame, List[int]]:
         """
         Calculates integrals or concentrations of deconvolved peaks.
@@ -407,38 +459,40 @@ class MoccaDataset:
             The columns of the dataframe are: 'Chromatogram ID', 'Chromatogram', and names of compounds
 
         List[int]
-            IDs of compounds in the same order as in DataFrame    
-        
+            IDs of compounds in the same order as in DataFrame
+
         """
 
         columns = [
             list(self.chromatograms.keys()),
-            [chrom.name for chrom in self.chromatograms.values()]
+            [chrom.name for chrom in self.chromatograms.values()],
         ]
 
-        column_names = ['Chromatogram ID', 'Chromatogram']
+        column_names = ["Chromatogram ID", "Chromatogram"]
 
         integrals = [chrom.get_integrals() for chrom in self.chromatograms.values()]
 
-        compound_ids = sorted(self.compounds.keys(), key=lambda c_id: self.compounds[c_id].elution_time)
-
+        compound_ids = sorted(
+            self.compounds.keys(), key=lambda c_id: self.compounds[c_id].elution_time
+        )
 
         for c_id in compound_ids:
             name = self.compounds[c_id].name
             conc_factor = self.compounds[c_id].concentration_factor
             if conc_factor is None:
-                conc_factor = 1.
+                conc_factor = 1.0
             column_names.append(name)
-            columns.append([
-                None if c_id not in ints else
-                ints[c_id] * conc_factor
-                for ints in integrals
-            ])
-        
+            columns.append(
+                [
+                    None if c_id not in ints else ints[c_id] * conc_factor
+                    for ints in integrals
+                ]
+            )
+
         df = pd.DataFrame(zip(*columns), columns=column_names)
 
         return df, compound_ids
-    
+
     def get_relative_concentrations(self) -> Tuple[pd.DataFrame, List[int]]:
         """
         Calculates integrals or concentrations of deconvolved peaks relative to internal standard.
@@ -452,86 +506,90 @@ class MoccaDataset:
             The columns of the dataframe are: 'Chromatogram ID', 'Chromatogram', and names of compounds
 
         List[int]
-            IDs of compounds in the same order as in DataFrame    
-        
+            IDs of compounds in the same order as in DataFrame
+
         """
 
-        assert self.istd_compound is not None, "Cannot calculate relative concentrations, the internal standard is not specified"
+        assert (
+            self.istd_compound is not None
+        ), "Cannot calculate relative concentrations, the internal standard is not specified"
 
         columns = [
             list(self.chromatograms.keys()),
-            [chrom.name for chrom in self.chromatograms.values()]
+            [chrom.name for chrom in self.chromatograms.values()],
         ]
 
-        column_names = ['Chromatogram ID', 'Chromatogram']
-
+        column_names = ["Chromatogram ID", "Chromatogram"]
 
         # Get relative integrals (compound_integral / ISTD_integral)
-        integrals = [chrom.get_relative_integrals(self.istd_compound) for chrom in self.chromatograms.values()]
+        integrals = [
+            chrom.get_relative_integrals(self.istd_compound)
+            for chrom in self.chromatograms.values()
+        ]
 
         # Scale the integrals by given ISTD concentration
         for idx, ch_id in enumerate(columns[0]):
             if ch_id in self.istd_concentrations:
                 istd_conc = self.istd_concentrations[ch_id]
             else:
-                istd_conc = 1.
+                istd_conc = 1.0
             for key in integrals[idx]:
                 integrals[idx][key] *= istd_conc
 
-        compound_ids = sorted(self.compounds.keys(), key=lambda c_id: self.compounds[c_id].elution_time)
+        compound_ids = sorted(
+            self.compounds.keys(), key=lambda c_id: self.compounds[c_id].elution_time
+        )
 
         # put all results into dataframe
         for c_id in compound_ids:
             name = self.compounds[c_id].name
             conc_factor = self.compounds[c_id].concentration_factor_vs_istd
             if conc_factor is None:
-                conc_factor = 1.
+                conc_factor = 1.0
             column_names.append(name)
-            columns.append([
-                None if c_id not in ints else
-                ints[c_id] * conc_factor
-                for ints in integrals
-            ])
+            columns.append(
+                [
+                    None if c_id not in ints else ints[c_id] * conc_factor
+                    for ints in integrals
+                ]
+            )
 
         df = pd.DataFrame(zip(*columns), columns=column_names)
 
         return df, compound_ids
 
-    def to_json(self):
-        json_dict = deepcopy(self.__dict__)
+    def to_dict(self) -> Dict[str, Any]:
+        """Converts the data to a dictionary for serialization"""
+        dic = {
+            "chromatograms": {k: v.to_dict() for k, v in self.chromatograms.items()},
+            "_raw_2d_data": {k: v.to_dict() for k, v in self._raw_2d_data.items()},
+            "compounds": {k: v.to_dict() for k, v in self.compounds.items()},
+            "compound_references": self.compound_references,
+            "istd_concentrations": self.istd_concentrations,
+            "istd_chromatogram": self.istd_chromatogram,
+            "istd_compound": self.istd_compound,
+            "settings": self.settings.to_dict(),
+        }
+        return dic | {"__classname__": "MoccaDataset"}
 
-        cls_to_convert = ['chromatograms', '_raw_2d_data', 'compounds']
-
-        for cls in cls_to_convert:
-            for key in json_dict[cls].keys():
-                json_dict[cls][key] = json_dict[cls][key].to_json()
-
-        json_dict['settings'] = json_dict['settings'].to_json()
-
-        return json_dict
-
-    def from_json(json_dict_input):
-        json_dict = deepcopy(json_dict_input)
-        # Convert all classes in a dictionary into the class instance
-        for key in json_dict['chromatograms'].keys():
-            json_dict['chromatograms'][key] = Chromatogram.from_json(json_dict['chromatograms'][key])
-
-        for key in json_dict['_raw_2d_data'].keys():
-            json_dict['_raw_2d_data'][key] = Data2D.from_json(json_dict['_raw_2d_data'][key])
-
-        for key in json_dict['compounds'].keys():
-            json_dict['compounds'][key] = Compound.from_json(json_dict['compounds'][key])
-
-        json_dict['settings'] = ProcessingSettings.from_json(json_dict['settings'])
+    @staticmethod
+    def from_dict(data: Dict[str, Any]) -> MoccaDataset:
+        """Creates a MoccaDataset object from a dictionary"""
+        assert data["__classname__"] == "MoccaDataset"
 
         dataset = MoccaDataset()
-        dataset.chromatograms = json_dict['chromatograms']
-        dataset._raw_2d_data = json_dict['_raw_2d_data']
-        dataset.compounds = json_dict['compounds']
-        dataset.compound_references = json_dict['compound_references']
-        dataset.istd_concentrations = json_dict['istd_concentrations']
-        dataset.istd_chromatogram = json_dict['istd_chromatogram']
-        dataset.istd_compound = json_dict['istd_compound']
-        dataset.settings = json_dict['settings']
-
+        dataset.chromatograms = {
+            int(k): Chromatogram.from_dict(v) for k, v in data["chromatograms"].items()
+        }
+        dataset._raw_2d_data = {
+            int(k): Data2D.from_dict(v) for k, v in data["_raw_2d_data"].items()
+        }
+        dataset.compounds = {
+            int(k): Compound.from_dict(v) for k, v in data["compounds"].items()
+        }
+        dataset.compound_references = data["compound_references"]
+        dataset.istd_concentrations = data["istd_concentrations"]
+        dataset.istd_chromatogram = data["istd_chromatogram"]
+        dataset.istd_compound = data["istd_compound"]
+        dataset.settings = ProcessingSettings.from_dict(data["settings"])
         return dataset

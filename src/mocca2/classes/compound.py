@@ -1,10 +1,11 @@
-from typing import List, Tuple
+from __future__ import annotations
+from typing import List, Tuple, Dict, Any
 from numpy.typing import NDArray
-from copy import deepcopy
 
-from scipy.ndimage import gaussian_filter # type: ignore
-from scipy.signal import find_peaks # type: ignore
-import numpy as np 
+from scipy.ndimage import gaussian_filter  # type: ignore
+from scipy.signal import find_peaks  # type: ignore
+import numpy as np
+
 
 class Compound:
     """Information about single chemical compound"""
@@ -28,13 +29,13 @@ class Compound:
     """Cached indeces of absorption maxima. Access this by the absorption_maxima() function"""
 
     def __init__(
-            self,
-            elution_time: int,
-            spectrum: NDArray,
-            name: str | None = None,
-            concentration_factor: float | None = None,
-            concentration_factor_vs_istd: float | None = None
-        ):
+        self,
+        elution_time: int,
+        spectrum: NDArray,
+        name: str | None = None,
+        concentration_factor: float | None = None,
+        concentration_factor_vs_istd: float | None = None,
+    ):
         self.elution_time = elution_time
         self.spectrum = spectrum
         self.name = name
@@ -50,26 +51,35 @@ class Compound:
         if self._absorption_maxima is None:
             self._absorption_maxima = []
 
-            second_deriv = gaussian_filter(self.spectrum, len(self.spectrum)/40, order=2)
+            second_deriv = gaussian_filter(
+                self.spectrum, len(self.spectrum) / 40, order=2
+            )
             peaks, _ = find_peaks(-second_deriv, rel_height=0.3)
             peaks = sorted(peaks)
             max_height = np.max(self.spectrum)
-            rel_heights = [self.spectrum[p]/max_height for p in peaks]
+            rel_heights = [self.spectrum[p] / max_height for p in peaks]
             for p, h in zip(peaks, rel_heights):
                 if h > 0.03:
                     self._absorption_maxima.append((p, h))
-                
+
         return self._absorption_maxima
 
-    def to_json(self):
-        json_dict = deepcopy(self.__dict__)
-        json_dict['spectrum'] = json_dict['spectrum'].tolist()
-        return json_dict
+    def to_dict(self) -> Dict[str, Any]:
+        """Converts the data to a dictionary for serialization"""
+        data = self.__dict__
+        data["spectrum"] = data["spectrum"].tolist()
+        data["__classname__"] = "Compound"
+        return data
 
-    def from_json(json_dict):
-        compound_init_vars = ['elution_time', 'spectrum', 'name', 'concentration_factor', 'concentration_factor_vs_istd']
-        compound_init_dict = {key: json_dict[key] for key in compound_init_vars}
-        compound_init_dict['spectrum'] = np.array(compound_init_dict['spectrum'])
-        compound = Compound(**compound_init_dict)
-        compound._absorption_maxima = json_dict['_absorption_maxima']
-        return compound
+    @staticmethod
+    def from_dict(data: Dict[str, Any]) -> Compound:
+        """Creates a Compound object from a dictionary"""
+        assert data["__classname__"] == "Compound"
+
+        return Compound(
+            int(data["elution_time"]),
+            np.array(data["spectrum"]),
+            data["name"],
+            data["concentration_factor"],
+            data["concentration_factor_vs_istd"],
+        )
