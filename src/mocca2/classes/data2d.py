@@ -30,7 +30,7 @@ class Data2D:
         return _closest(self.wavelength, wavelength)
 
     def extract_time(
-        self, min_time: float, max_time: float, inplace: bool = False
+        self, min_time: float | None, max_time: float | None, inplace: bool = False
     ) -> Data2D:
         """
         Extracts the data in the given time range
@@ -38,10 +38,10 @@ class Data2D:
         Parameters
         ----------
 
-        min_time: float
+        min_time: float | None
             Start time of the extracted segment
 
-        max_time: float
+        max_time: float | None
             End time of the extracted segment
 
         inplace: bool
@@ -54,6 +54,11 @@ class Data2D:
             The data in the given time interval
 
         """
+
+        if min_time is None:
+            min_time = -np.inf
+        if max_time is None:
+            max_time = np.inf
 
         start_idx = self.closest_time(min_time)[0]
         end_idx = self.closest_time(max_time)[0]
@@ -70,7 +75,10 @@ class Data2D:
         )
 
     def extract_wavelength(
-        self, min_wavelength: float, max_wavelength: float, inplace: bool = False
+        self,
+        min_wavelength: float | None,
+        max_wavelength: float | None,
+        inplace: bool = False,
     ) -> Data2D:
         """
         Extracts the data in the given wavelength range
@@ -78,10 +86,10 @@ class Data2D:
         Parameters
         ----------
 
-        min_wavelength: float
+        min_wavelength: float | None
             Start wavelength of the extracted segment
 
-        max_wavelength: float
+        max_wavelength: float | None
             End wavelength of the extracted segment
 
         inplace: bool
@@ -94,6 +102,10 @@ class Data2D:
             The data in the given wavelength interval
 
         """
+        if min_wavelength is None:
+            min_wavelength = -np.inf
+        if max_wavelength is None:
+            max_wavelength = np.inf
 
         start_idx = self.closest_wavelength(min_wavelength)[0]
         end_idx = self.closest_wavelength(max_wavelength)[0]
@@ -223,6 +235,7 @@ class Data2D:
 
         return Data2D(self.time, self.wavelength, self.data - other)
 
+    # Methods for serializing and deserializing the data
     def to_dict(self) -> Dict[str, Any]:
         """Converts the data to a dictionary for serialization"""
         dic = {
@@ -241,6 +254,55 @@ class Data2D:
         return Data2D(
             np.array(data["time"]), np.array(data["wavelength"]), np.array(data["data"])
         )
+
+    # Plotting
+    def plot(self, ax=None):
+        """Plots the data using matplotlib.pyplot.imshow"""
+        import matplotlib.pyplot as plt
+
+        if ax is None:
+            fig, ax = plt.subplots()
+
+        ax.plot(self.time, self.contract(), "k-")
+        ax.set_xlabel("Time [min]")
+        ax.set_ylabel("Absorbance [mAU]")
+
+        # set lower y limit to 0
+        ymin, ymax = ax.get_ylim()
+        ax.set_ylim(0, ymax)
+
+        # set x limit to the time range
+        ax.set_xlim(self.time[0], self.time[-1])
+
+        # hide the right and top spines
+        ax.spines["right"].set_visible(False)
+        ax.spines["top"].set_visible(False)
+
+        return ax
+
+    def plot_2d(self, ax=None):
+        """Plots the heatmap for intensity against time and wavelength"""
+        import matplotlib.pyplot as plt
+
+        if ax is None:
+            fig, ax = plt.subplots()
+
+        ax.imshow(
+            self.data,
+            aspect="auto",
+            origin="lower",
+            cmap="gist_ncar",
+            extent=[
+                self.time[0],
+                self.time[-1],
+                self.wavelength[0],
+                self.wavelength[-1],
+            ],
+        )
+        ax.set_xlabel("Time [min]")
+        ax.set_ylabel("Wavelength [nm]")
+
+        return ax
 
 
 def _closest(data: NDArray, point: float) -> Tuple[int, float]:

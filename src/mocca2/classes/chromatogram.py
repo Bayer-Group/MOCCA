@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 from typing import List, Literal, Dict, Callable, Any
+
 import numpy as np
 
 from mocca2.classes import Data2D, Peak, DeconvolvedPeak, Component, Compound
@@ -213,7 +214,10 @@ class Chromatogram(Data2D):
 
     def deconvolve_peaks(
         self,
-        model: PeakModel | Literal["BiGaussian", "BiGaussianTailing", "FraserSuzuki"],
+        model: (
+            PeakModel
+            | Literal["BiGaussian", "BiGaussianTailing", "FraserSuzuki", "Bemg"]
+        ),
         min_r2: float,
         relaxe_concs: bool,
         max_comps: int,
@@ -441,6 +445,7 @@ class Chromatogram(Data2D):
         # remove peaks with no components
         self.peaks = [peak for peak in self.peaks if len(peak.components) > 0]
 
+    # serialization and deserialization
     def to_dict(self) -> Dict[str, Any]:
         """Converts the data to a dictionary for serialization"""
         data = super().to_dict()
@@ -456,9 +461,15 @@ class Chromatogram(Data2D):
     def from_dict(data: Dict[str, Any]) -> Chromatogram:
         """Creates a Chromatogram object from a dictionary"""
         assert data["__classname__"] == "Chromatogram"
-
         data2d = Data2D.from_dict(data | {"__classname__": "Data2D"})
-        peaks = [Peak.from_dict(peak) for peak in data["peaks"]]
+        peaks = [
+            (
+                Peak.from_dict(peak)
+                if peak["__classname__"] == "Peak"
+                else DeconvolvedPeak.from_dict(peak)
+            )
+            for peak in data["peaks"]
+        ]
         sample_path = data["sample_path"]
         blank_path = data["blank_path"]
         name = data["name"]
@@ -469,3 +480,42 @@ class Chromatogram(Data2D):
         chrom.blank_path = blank_path
         chrom.name = name
         return chrom
+
+    # plotting
+    def plot(self, ax=None):
+        ax = super().plot(ax)
+
+        # add peaks
+        colors = [
+            "#1f77b4",
+            "#ff7f0e",
+            "#2ca02c",
+            "#d62728",
+            "#9467bd",
+            "#8c564b",
+            "#e377c2",
+            "#7f7f7f",
+            "#bcbd22",
+            "#17becf",
+        ]
+
+        idx = 0
+        for peak in self.peaks:
+            for component in peak.components:
+                time = peak.time(self.time)
+                intensity = component.concentration
+                ax.plot(
+                    time,
+                    intensity,
+                    color=colors[idx % len(colors)],
+                    linestyle="-",
+                )
+                ax.fill_between(
+                    time,
+                    intensity,
+                    color=colors[idx % len(colors)],
+                    alpha=0.3,
+                )
+                idx += 1
+
+        return ax

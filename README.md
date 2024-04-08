@@ -1,3 +1,5 @@
+[![PyPI](https://img.shields.io/pypi/v/mocca2.svg)](https://pypi.org/project/mocca2/)
+
 # Welcome to MOCCA2
 
 This package is based on [MOCCA](https://github.com/HaasCP/mocca) package by [HaasCP](https://github.com/HaasCP).
