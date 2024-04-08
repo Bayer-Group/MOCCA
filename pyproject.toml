@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mocca2"
-version = "0.0.6"
+version = "0.0.7"
 authors = [
   { name="Jan Oboril", email="jan.oboril@gmail.com" },
 ]
@@ -27,5 +27,5 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/pypa/sampleproject"
-Issues = "https://github.com/pypa/sampleproject/issues"
+Homepage = "https://oboril.github.io/mocca/"
+Issues = "https://github.com/oboril/mocca/issues"
