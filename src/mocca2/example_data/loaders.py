@@ -15,7 +15,7 @@ def check_data_needs_downloading():
     """
     Check if the example data needs to be downloaded.
     """
-    if not impresources.is_resource(example_data, "data"):
+    if not os.path.exists(impresources.files(example_data) / "data"):
         raise FileNotFoundError(
             "Example data not found. Please run 'python -m mocca2 --download-data' to download the example data."
         )

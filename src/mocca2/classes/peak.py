@@ -49,7 +49,7 @@ class Peak:
 
     def to_dict(self) -> Dict[str, Any]:
         """Converts the data to a dictionary for serialization"""
-        return self.__dict__ | {"__classname__": "Peak"}
+        return self.__dict__.copy() | {"__classname__": "Peak"}
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> Peak:

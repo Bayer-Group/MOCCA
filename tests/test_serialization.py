@@ -3,19 +3,25 @@ import numpy
 
 
 def deep_equal(a, b):
-    if type(a) != type(b):
-        return False
     if isinstance(a, dict):
         if len(a) != len(b):
+            print("Dictionary length mismatch")
+            print(a, b)
             return False
         for key in a:
             if key not in b:
+                print(f"Key {key} not in b")
+                print(list(a.keys()), list(b.keys()))
                 return False
             if not deep_equal(a[key], b[key]):
+                print(f"Value mismatch for key {key}")
+                print(a[key], b[key])
                 return False
         return True
     if isinstance(a, list):
         if len(a) != len(b):
+            print("List length mismatch")
+            print(a, b)
             return False
         for i in range(len(a)):
             if not deep_equal(a[i], b[i]):
@@ -23,6 +29,8 @@ def deep_equal(a, b):
         return True
     if isinstance(a, tuple):
         if len(a) != len(b):
+            print("Tuple length mismatch")
+            print(a, b)
             return False
         for i in range(len(a)):
             if not deep_equal(a[i], b[i]):
@@ -34,11 +42,22 @@ def deep_equal(a, b):
         or isinstance(a, str)
         or isinstance(a, bool)
         or isinstance(a, type(None))
+        or isinstance(a, numpy.int64)
+        or isinstance(a, numpy.float64)
+        or isinstance(a, numpy.float32)
+        or isinstance(a, numpy.bool_)
     ):
-        return a == b
+        if a != b:
+            print(f"Value mismatch: {a} != {b}")
+            return False
+        return True
 
     if isinstance(a, numpy.ndarray):
-        return numpy.allclose(a, b)
+        if not numpy.allclose(a, b):
+            print("Array mismatch")
+            print(a, b)
+            return False
+        return True
 
     return deep_equal(a.__dict__, b.__dict__)
 
@@ -56,8 +75,9 @@ def test_dict_serialization():
     chrom_dict = chrom.to_dict()
     chrom2 = mocca2.classes.chromatogram.Chromatogram.from_dict(chrom_dict)
 
-    print(chrom_dict)
-    print(chrom2.to_dict())
-
     assert deep_equal(chrom, chrom2)
     assert deep_equal(chrom_dict, chrom2.to_dict())
+
+
+if __name__ == "__main__":
+    test_dict_serialization()

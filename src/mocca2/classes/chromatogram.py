@@ -448,14 +448,13 @@ class Chromatogram(Data2D):
     # serialization and deserialization
     def to_dict(self) -> Dict[str, Any]:
         """Converts the data to a dictionary for serialization"""
-        data = super().to_dict()
-        data["peaks"] = [peak.to_dict() for peak in self.peaks]
+        data = super().to_dict().copy()
+        data["peaks"] = [peak.to_dict().copy() for peak in self.peaks]
         data["sample_path"] = self.sample_path
         data["blank_path"] = self.blank_path
         data["name"] = self.name
 
-        data["__classname__"] = "Chromatogram"
-        return data
+        return data | {"__classname__": "Chromatogram"}
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> Chromatogram:

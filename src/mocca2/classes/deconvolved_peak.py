@@ -113,8 +113,8 @@ class DeconvolvedPeak(Peak):
 
     def to_dict(self) -> Dict[str, Any]:
         """Converts the data to a dictionary for serialization"""
-        data = super().to_dict()
-        data["components"] = [c.to_dict() for c in self.components]
+        data = super().to_dict().copy()
+        data["components"] = [c.to_dict().copy() for c in self.components]
         data["residual_mse"] = self.residual_mse
         data["r2"] = self.r2
         data["resolved"] = self.resolved

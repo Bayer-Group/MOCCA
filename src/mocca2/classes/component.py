@@ -48,11 +48,10 @@ class Component:
 
     def to_dict(self) -> Dict[str, Any]:
         """Converts the data to a dictionary for serialization"""
-        data = self.__dict__
+        data = self.__dict__.copy()
         data["spectrum"] = data["spectrum"].tolist()
         data["concentration"] = data["concentration"].tolist()
-        data["__classname__"] = "Component"
-        return data
+        return data | {"__classname__": "Component"}
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> Component:
