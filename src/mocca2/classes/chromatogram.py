@@ -489,8 +489,9 @@ class Chromatogram(Data2D):
         color: str = "k",
         label: str | None = None,
         plot_peaks: bool = True,
+        zero_line: bool = False,
     ) -> matplotlib.axes.Axes:
-        ax = super().plot(ax=ax, color=color, label=label)
+        ax = super().plot(ax=ax, color=color, label=label, zero_line=zero_line)
 
         if not plot_peaks:
             return ax

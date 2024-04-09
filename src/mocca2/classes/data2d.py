@@ -263,9 +263,13 @@ class Data2D:
         ax: matplotlib.axes.Axes = None,
         color: str = "k",
         label: str | None = None,
+        zero_line: bool = False,
     ) -> matplotlib.axes.Axes:
         """Plots the data using matplotlib.pyplot.imshow"""
-        import matplotlib.pyplot as plt
+
+        # draw line at 0
+        if zero_line:
+            ax.axhline(0, color="k", lw=0.5, alpha=0.5)
 
         if ax is None:
             fig, ax = plt.subplots()
@@ -273,10 +277,6 @@ class Data2D:
         ax.plot(self.time, self.contract(), "-", color=color, label=label)
         ax.set_xlabel("Time [min]")
         ax.set_ylabel("Absorbance [mAU]")
-
-        # set lower y limit to 0
-        ymin, ymax = ax.get_ylim()
-        ax.set_ylim(0, ymax)
 
         # set x limit to the time range
         ax.set_xlim(self.time[0], self.time[-1])
@@ -288,24 +288,31 @@ class Data2D:
         return ax
 
     def plot_2d(
-        self, ax: matplotlib.axes.Axes = None, colormap: str = "gist_ncar"
+        self,
+        ax: matplotlib.axes.Axes = None,
+        colormap: str = "gist_ncar",
+        colorbar: bool = True,
     ) -> matplotlib.axes.Axes:
         """Plots the heatmap for intensity against time and wavelength"""
         if ax is None:
             fig, ax = plt.subplots()
 
-        ax.imshow(
-            self.data,
+        heatmap = ax.imshow(
+            self.data[::-1, :],
             aspect="auto",
             origin="lower",
             cmap=colormap,
             extent=[
                 self.time[0],
                 self.time[-1],
-                self.wavelength[0],
                 self.wavelength[-1],
+                self.wavelength[0],
             ],
         )
+
+        if colorbar:
+            plt.colorbar(heatmap, ax=ax, label="Absorbance [mAU]")
+
         ax.set_xlabel("Time [min]")
         ax.set_ylabel("Wavelength [nm]")
 
