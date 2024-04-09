@@ -74,7 +74,6 @@ Now, we could for example average the absorption spectrum over the peak.
     plt.plot(peak_region.wavelength, avg_spectrum)
     plt.xlabel("Wavelength [nm]")
     plt.ylabel("Average absorbance [mAU]")
-    # plt.savefig("docs/_static/ex_basic_spectrum.svg")
     plt.show()
 
 .. image:: _static/ex_basic_spectrum.svg

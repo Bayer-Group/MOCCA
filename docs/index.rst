@@ -14,7 +14,7 @@ To automate your workflow and get accurate results, MOCCA2 features:
 Getting Started
 ---------------
 
-`Get Started <installation.html>`_ by installing MOCCA2 and processing your first chromatogram!
+`Get started <installation.html>`_ by installing MOCCA2 and processing your first chromatogram!
 
 Publications and MOCCA
 ----------------------
