@@ -6,6 +6,11 @@ The latest version of MOCCA2 can be installed simply using pip:
 .. code-block:: bash
 
     pip install mocca2
+
+Example data can be then downloaded using the following command:
+
+.. code-block:: bash
+
     python -m mocca2 --download-data
 
 Now you are ready to process your first chromatogram!

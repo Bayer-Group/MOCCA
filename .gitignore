@@ -3,3 +3,4 @@ venv
 docs/_build
 build
 src/*.egg-info
+.pytest_cache

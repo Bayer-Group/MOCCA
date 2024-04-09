@@ -5,7 +5,6 @@ from numpy.typing import NDArray
 import numpy as np
 
 from mocca2.classes import Peak, Component
-from copy import deepcopy
 
 
 class DeconvolvedPeak(Peak):

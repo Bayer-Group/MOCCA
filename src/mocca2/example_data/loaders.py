@@ -21,7 +21,7 @@ def check_data_needs_downloading():
         )
 
 
-def example_1() -> Chromatogram:
+def example_1(substract_blank: bool = True) -> Chromatogram:
     """
     Loads example chromatogram.
 
@@ -30,12 +30,14 @@ def example_1() -> Chromatogram:
     check_data_needs_downloading()
 
     chrom = impresources.files(example_data) / "data/examples/chrom1.arw"
-    blank = impresources.files(example_data) / "data/examples/blank1.arw"
+    if not substract_blank:
+        return Chromatogram(str(chrom), name="example_chromatrogram_1")
 
+    blank = impresources.files(example_data) / "data/examples/blank1.arw"
     return Chromatogram(str(chrom), str(blank), name="example_chromatrogram_1")
 
 
-def example_2() -> Chromatogram:
+def example_2(substract_blank: bool = True) -> Chromatogram:
     """
     Loads example chromatogram.
 
@@ -44,12 +46,14 @@ def example_2() -> Chromatogram:
     check_data_needs_downloading()
 
     chrom = impresources.files(example_data) / "data/examples/chrom2.arw"
-    blank = impresources.files(example_data) / "data/examples/blank2.arw"
+    if not substract_blank:
+        return Chromatogram(str(chrom), name="example_chromatrogram_2")
 
+    blank = impresources.files(example_data) / "data/examples/blank2.arw"
     return Chromatogram(str(chrom), str(blank), name="example_chromatrogram_2")
 
 
-def example_3() -> Chromatogram:
+def example_3(substract_blank: bool = True) -> Chromatogram:
     """
     Loads example chromatogram.
 
@@ -58,12 +62,16 @@ def example_3() -> Chromatogram:
     check_data_needs_downloading()
 
     chrom = impresources.files(example_data) / "data/examples/chrom3.arw"
-    blank = impresources.files(example_data) / "data/examples/blank3.arw"
+    if not substract_blank:
+        return Chromatogram(str(chrom), name="example_chromatrogram_3")
 
+    blank = impresources.files(example_data) / "data/examples/blank3.arw"
     return Chromatogram(str(chrom), str(blank), name="example_chromatrogram_3")
 
 
-def knoevenagel_calibration(which: Literal["1", "2", "both"] = "both") -> pd.DataFrame:
+def knoevenagel_calibration(
+    which: Literal["1", "2", "both"] = "both", substract_blank: bool = True
+) -> pd.DataFrame:
     """
     Loads all chromatograms used for calibration curves in the Knoevenagel reaction, published in 10.1021/acscentsci.2c01042.
 
@@ -139,8 +147,9 @@ def knoevenagel_calibration(which: Literal["1", "2", "both"] = "both") -> pd.Dat
         blanks[int(grad_len)] = blank
 
     # substract blanks
-    for idx, data in enumerate(compound_data):
-        data["chrom"] -= blanks[int(data["grad_len"])]
+    if substract_blank:
+        for idx, data in enumerate(compound_data):
+            data["chrom"] -= blanks[int(data["grad_len"])]
 
     # create the dataframe
     df = pd.DataFrame(compound_data)
@@ -162,7 +171,9 @@ def knoevenagel_calibration(which: Literal["1", "2", "both"] = "both") -> pd.Dat
     return df
 
 
-def knoevenagel(which: Literal["ba_ome", "ba_ome_nme2"]) -> pd.DataFrame:
+def knoevenagel(
+    which: Literal["ba_ome", "ba_ome_nme2"], substract_blank: bool = True
+) -> pd.DataFrame:
     """
     Loads all chromatograms from Knoevenagel reaction with benzaldehyde, 4-methoxybenzaldehyde and optionally 4-(N,N-dimethyl)benzaldehyde, published in 10.1021/acscentsci.2c01042.
 
@@ -233,8 +244,9 @@ def knoevenagel(which: Literal["ba_ome", "ba_ome_nme2"]) -> pd.DataFrame:
         blanks[int(grad_len)] = blank
 
     # substract blanks
-    for idx, data in enumerate(chromatogram_data):
-        data["chrom"] -= blanks[int(data["grad_len"])]
+    if substract_blank:
+        for idx, data in enumerate(chromatogram_data):
+            data["chrom"] -= blanks[int(data["grad_len"])]
 
     # create the dataframe
     df = pd.DataFrame(chromatogram_data)
@@ -257,7 +269,9 @@ def knoevenagel(which: Literal["ba_ome", "ba_ome_nme2"]) -> pd.DataFrame:
     return df
 
 
-def cyanation() -> Dict[str, Chromatogram | List[Chromatogram]]:
+def cyanation(
+    substract_blank: bool = True,
+) -> Dict[str, Chromatogram | List[Chromatogram]]:
     """
     Loads the chromatograms from the cyanation reaction, published in 10.1021/acscentsci.2c01042.
 
@@ -278,7 +292,10 @@ def cyanation() -> Dict[str, Chromatogram | List[Chromatogram]]:
     # load all the chromatograms
     chromatograms = {}
 
-    blank = Chromatogram(filename("gradient_97"))
+    if substract_blank:
+        blank = Chromatogram(filename("gradient_97"))
+    else:
+        blank = None
 
     chromatograms["istd"] = Chromatogram(filename("istd_96"), blank)
     chromatograms["educt_1"] = Chromatogram(filename("educt_88"), blank)
@@ -297,13 +314,17 @@ def cyanation() -> Dict[str, Chromatogram | List[Chromatogram]]:
     return chromatograms
 
 
-def benzaldehyde() -> Tuple[Chromatogram, Chromatogram]:
+def benzaldehyde(substract_blank: bool = True) -> Tuple[Chromatogram, Chromatogram]:
     """Loads tutorial data published with the original MOCCA package, these contain 1mM and 0.5mM benzaldehyde respectively."""
     check_data_needs_downloading()
 
     directory = str(impresources.files(example_data) / "data/benzaldehyde")
 
-    blank = Chromatogram(os.path.join(directory, "blank.D"))
+    if substract_blank:
+        blank = Chromatogram(os.path.join(directory, "blank.D"))
+    else:
+        blank = None
+
     chrom_1 = Chromatogram(
         os.path.join(directory, "ba_1.D"), blank, interpolate_blank=True
     )
