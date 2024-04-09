@@ -3,7 +3,9 @@
 from __future__ import annotations
 from typing import List, Literal, Dict, Callable, Any
 
+import matplotlib.axes
 import numpy as np
+import matplotlib
 
 from mocca2.classes import Data2D, Peak, DeconvolvedPeak, Component, Compound
 from mocca2 import parsers
@@ -104,7 +106,7 @@ class Chromatogram(Data2D):
         smooth_wl: int | None = None,
     ) -> None:
         """
-        Estimates baseline using AsLS, arPLS or FlatFit algorithm
+        Corrects the baseline using AsLS, arPLS or FlatFit algorithm
 
         Parameters
         ----------
@@ -481,8 +483,17 @@ class Chromatogram(Data2D):
         return chrom
 
     # plotting
-    def plot(self, ax=None):
-        ax = super().plot(ax)
+    def plot(
+        self,
+        ax: matplotlib.axes.Axes = None,
+        color: str = "k",
+        label: str | None = None,
+        plot_peaks: bool = True,
+    ) -> matplotlib.axes.Axes:
+        ax = super().plot(ax=ax, color=color, label=label)
+
+        if not plot_peaks:
+            return ax
 
         # add peaks
         colors = [

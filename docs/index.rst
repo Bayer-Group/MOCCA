@@ -56,6 +56,7 @@ Contents
    ref_peak
    ref_deconvolution
    ref_clustering
+   ref_example_data
 
 Contributing
 ============

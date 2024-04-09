@@ -4,6 +4,8 @@ from numpy.typing import NDArray
 
 import numpy as np
 from scipy.interpolate import interp1d
+import matplotlib
+from matplotlib import pyplot as plt
 
 
 class Data2D:
@@ -256,14 +258,19 @@ class Data2D:
         )
 
     # Plotting
-    def plot(self, ax=None):
+    def plot(
+        self,
+        ax: matplotlib.axes.Axes = None,
+        color: str = "k",
+        label: str | None = None,
+    ) -> matplotlib.axes.Axes:
         """Plots the data using matplotlib.pyplot.imshow"""
         import matplotlib.pyplot as plt
 
         if ax is None:
             fig, ax = plt.subplots()
 
-        ax.plot(self.time, self.contract(), "k-")
+        ax.plot(self.time, self.contract(), "-", color=color, label=label)
         ax.set_xlabel("Time [min]")
         ax.set_ylabel("Absorbance [mAU]")
 
@@ -280,10 +287,10 @@ class Data2D:
 
         return ax
 
-    def plot_2d(self, ax=None):
+    def plot_2d(
+        self, ax: matplotlib.axes.Axes = None, colormap: str = "gist_ncar"
+    ) -> matplotlib.axes.Axes:
         """Plots the heatmap for intensity against time and wavelength"""
-        import matplotlib.pyplot as plt
-
         if ax is None:
             fig, ax = plt.subplots()
 
@@ -291,7 +298,7 @@ class Data2D:
             self.data,
             aspect="auto",
             origin="lower",
-            cmap="gist_ncar",
+            cmap=colormap,
             extent=[
                 self.time[0],
                 self.time[-1],

@@ -19,13 +19,13 @@ This is a wrapper for the baseline estimation algorithms :func:`asls()<mocca2.ba
 
 AsLS()
 ~~~~~~
-**As**ymmetric **l**east **s**quares with smoothness penalty.
+**As**\ ymmetric **L**\ east **S**\ quares with smoothness penalty.
 
 .. autofunction:: mocca2.baseline.asls.asls
 
 arPLS()
 ~~~~~~~
-**A**symmetrically **r**eweighted **p**enalized **l**east **s**quares ith smoothness penalty..
+**A**\ symmetrically **r**\ eweighted **P**\ enalized **L**\ east **S**\ quares ith smoothness penalty..
 
 .. autofunction:: mocca2.baseline.arpls.arpls
 

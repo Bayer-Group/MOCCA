@@ -6,4 +6,5 @@ from mocca2.example_data.loaders import (
     knoevenagel_calibration,
     knoevenagel,
     cyanation,
+    diterpene_esters,
 )
