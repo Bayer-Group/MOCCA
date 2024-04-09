@@ -18,7 +18,9 @@ def download_data():
     files = ["examples", "benzaldehyde", "diterpene_esters", "knoevenagel", "cyanation"]
 
     directory = impresources.files(example_data).joinpath("data")
-    directory.mkdir(parents=True, exist_ok=True)
+    if directory.exists():
+        raise ValueError("Data has been already downloaded.")
+    directory.mkdir()
 
     for file in files:
         url = f"https://github.com/oboril/mocca/raw/example-data/{file}.tar.bz2"
