@@ -94,7 +94,7 @@ The repository contains various example datasets:
  - Diterpene esters from coffee extracts ([Erny et al., 2021](https://doi.org/10.5281/zenodo.5412345))
  - and various standalone chromatograms
 
-Since these datasets don't fit into the PyPI package size limit, they are automatically compressed and published onto `example-data` branch. 
+Since these datasets don't fit into the PyPI package size limit, they are automatically compressed and published onto `example-data` branch on push to `main`. 
 
 The data can be automatically downloaded using ``python -m mocca2 --download-data``.
 
