@@ -94,4 +94,13 @@ The repository contains various example datasets:
  - Diterpene esters from coffee extracts ([Erny et al., 2021](https://doi.org/10.5281/zenodo.5412345))
  - and various standalone chromatograms
 
-Since these datasets don't fit into the PyPI package size limit, they are automatically compressed and published onto `example-data` branch. From there, they can be automatically downloaded using ``python -m mocca2 --download-data``.
+Since these datasets don't fit into the PyPI package size limit, they are automatically compressed and published onto `example-data` branch. 
+
+The data can be automatically downloaded using ``python -m mocca2 --download-data``.
+
+### Publishing to PyPI and GitHub
+On push to `main`, the MOCCA2 package is automatically published to [PyPI](https://pypi.org/project/mocca2/) and [GitHub Releases](https://github.com/oboril/mocca/releases).
+
+## Contributing
+
+The process for contributing is outlined in [CONTRIBUTING.md](https://github.com/oboril/mocca/blob/main/CONTRIBUTING.md).
