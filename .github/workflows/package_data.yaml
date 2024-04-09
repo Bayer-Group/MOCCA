@@ -23,9 +23,11 @@ jobs:
       # Compress the data
       - name: Compress the data
         run: |
-          for dir in src/mocca2/example_data/data/*; do
+          cd src/mocca2/example_data/data/
+          for dir in .; do
             tar -cjf $dir.tar.bz2 $dir
           done
+          cd ../../../../
           mkdir _temp
           mv src/mocca2/example_data/data/*.tar.bz2 _temp/
 
