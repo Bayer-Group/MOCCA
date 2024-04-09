@@ -18,7 +18,7 @@ To automate your workflow and get accurate results, MOCCA2 features:
 
 ## Documentation
 
-Examples and detailed documentation, visit the docs at [https://oboril.github.io/mocca](https://oboril.github.io/mocca).
+Examples and detailed documentation are documented at [https://oboril.github.io/mocca](https://oboril.github.io/mocca).
 
 ## Getting Started
 
