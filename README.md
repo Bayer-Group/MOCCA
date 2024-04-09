@@ -77,6 +77,21 @@ Inspired by MOCCA, MOCCA2 features more Pythonic interface as well as adaptive a
 
 Publication featuring MOCCA2 is coming soon!
 
-## Tests
+## Repository Details
 
-The 
+This repository automates numerous workflows:
+
+### Automatic testing
+On push to `main`, all tests in the `tests` directory are automatically run. Currently, MOCCA2 is tested on Ubuntu with Python 3.10, 3.11 and 3.12.
+
+### Docs
+On push to `main`, the Sphinx docs are automatically compiled and published to [GitHub pages](https://oboril.github.io/mocca).
+
+### Example data
+The repository contains various example datasets:
+ - Knoevenagel condensation ([Christian Haas et al., 2023](https://doi.org/10.1021/acscentsci.2c01042))
+ - Cyanation screening ([Christian Haas et al., 2023](https://doi.org/10.1021/acscentsci.2c01042))
+ - Diterpene esters from coffee extracts ([Erny et al., 2021](https://doi.org/10.5281/zenodo.5412345))
+ - and various standalone chromatograms
+
+Since these datasets don't fit into the PyPI package size limit, they are automatically compressed and published onto `example-data` branch. From there, they can be automatically downloaded using ``python -m mocca2 --download-data``.
