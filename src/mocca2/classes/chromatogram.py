@@ -511,22 +511,44 @@ class Chromatogram(Data2D):
         ]
 
         idx = 0
+        contracted = self.contract()
+
         for peak in self.peaks:
-            for component in peak.components:
-                time = peak.time(self.time)
-                intensity = component.concentration
-                ax.plot(
-                    time,
-                    intensity,
+            if isinstance(peak, DeconvolvedPeak):
+                for component in peak.components:
+                    time = peak.time(self.time)
+                    intensity = component.concentration
+                    ax.plot(
+                        time,
+                        intensity,
+                        color=colors[idx % len(colors)],
+                        linestyle="-",
+                    )
+                    ax.fill_between(
+                        time,
+                        intensity,
+                        color=colors[idx % len(colors)],
+                        alpha=0.3,
+                    )
+                    idx += 1
+            else:
+                mid = (self.time[peak.left] + self.time[peak.right]) / 2
+                stretch = (-self.time[peak.left] + self.time[peak.right]) / 2
+                ax.errorbar(
+                    [mid],
+                    [0],
+                    xerr=[stretch],
                     color=colors[idx % len(colors)],
-                    linestyle="-",
+                    capsize=3,
                 )
-                ax.fill_between(
-                    time,
-                    intensity,
-                    color=colors[idx % len(colors)],
-                    alpha=0.3,
-                )
+                for max in peak.all_maxima:
+                    ax.vlines(
+                        self.time[max],
+                        0,
+                        contracted[max],
+                        colors=colors[idx % len(colors)],
+                        lw=1.0,
+                    )
                 idx += 1
 
         return ax
