@@ -41,10 +41,15 @@ for chromatogram in chromatograms["reactions"]:
 # Specify the processing settings
 # Default values are usually fine, but check the results and adjust if necessary
 settings = ProcessingSettings(
+    baseline_model="arpls",
     min_elution_time=2.5,
-    max_elution_time=4,
+    max_elution_time=5,
     min_wavelength=230,
-    min_rel_prominence=0.05,
+    # Some of the chromatograms contain very intense peaks, most likely decomposed reagents
+    # To detect the smaller peaks of interest, disable filtering by relative height
+    min_rel_prominence=0.0,
+    min_prominence=1,
+    # Increase the required peak purity
     explained_threshold=0.998,
 )
 
@@ -52,10 +57,8 @@ settings = ProcessingSettings(
 dataset.process_all(settings, verbose=True, cores=15)
 
 # Get concentrations relative to the internal standard
-print(dataset.get_concentrations()[0].to_string(index=False))
-
 results = dataset.get_relative_concentrations()[0][
-    ["Chromatogram", "tetralin", "starting_material", "product"]
+    ["Chromatogram", "starting_material", "product"]
 ]
 
 # If a compound is not detected, the concentration is set to nan
@@ -70,31 +73,25 @@ results["Conversion [%]"] = (
 results["Yield [%]"] = 100 * results["product"] / initial_concentration
 
 # Print the results
-print(results[["Chromatogram", "Conversion [%]", "Yield [%]"]].to_string(index=False))
+print(
+    results[["Chromatogram", "Conversion [%]", "Yield [%]"]]
+    .round(0)
+    .to_string(index=False)
+)
 
-# for chrom in [dataset.chromatograms[i] for i in range(len(dataset.chromatograms))]:
-#     chrom.plot()
-#     plt.title(chrom.name)
-#     plt.show()
-# dataset.chromatograms[0].plot()
-# plt.show(block=False)
-# dataset.chromatograms[2].plot()
-# plt.show(block=False)
-# dataset.chromatograms[4].plot()
-# plt.show(block=True)
-
+# Plot the yields using a heatmap
+# List of reagents in rows and columns
 rows = "10a 10b 10c 10d 10e 10f 10g".split()
 columns = "DBU/XPhos DBU/tBu-XPhos DBU/CM-Phos TMG/XPhos TMG/tBu-XPhos TMG/CM-Phos DMAP/XPhos DMAP/tBu-XPhos DMAP/CM-Phos DIPEA/XPhos DIPEA/tBu-XPhos DIPEA/CM-Phos".split()
 
+# Extract the yields of the reaction and reshape
 yields = results["Yield [%]"][
     results["Chromatogram"].apply(lambda s: s.startswith("reaction_"))
 ].values
 
-yields = np.pad(yields, (0, len(rows) * len(columns) - len(yields)), constant_values=-1)
-
 yields = np.reshape(yields, [len(rows), len(columns)])
 
-
+# Plot the heatmap
 plt.imshow(yields, vmin=0, vmax=100, cmap="viridis")
 plt.xticks(
     np.arange(len(columns)),
@@ -105,14 +102,15 @@ plt.xticks(
 )
 plt.yticks(np.arange(len(rows)), labels=rows)
 
-# Loop over data dimensions and create text annotations.
+# Add annotations
 for i in range(len(rows)):
     for j in range(len(columns)):
         text = plt.text(
             j, i, f"{yields[i, j]:0.0f}", ha="center", va="center", color="w"
         )
 
+# Show the plot
 plt.title("Yields of the cyanation reaction")
-plt.colorbar(label="Yield [%]")
 plt.tight_layout()
+# plt.savefig("docs/_static/ex_batch_processing.svg")
 plt.show()

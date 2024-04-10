@@ -266,6 +266,12 @@ class MoccaDataset:
         """Processes all chromatograms: finds and deconvolves peaks, creates averaged compounds, and refines peaks"""
         self.settings = settings
 
+        def check_nans(self):
+            if any([c is None for c in self.chromatograms.values()]):
+                raise Exception("Some chromatograms are missing")
+
+        check_nans(self)
+
         # Reset some values
         self.compounds = {}
         for chromatogram in self.chromatograms.values():
@@ -308,6 +314,7 @@ class MoccaDataset:
                 )
                 for id, chromatogram in zip(keys, results):
                     self.chromatograms[id] = chromatogram
+        check_nans(self)
 
         # Peak picking
         if verbose:
@@ -338,6 +345,7 @@ class MoccaDataset:
                 )
                 for id, chromatogram in zip(keys, results):
                     self.chromatograms[id] = chromatogram
+        check_nans(self)
 
         # Initial deconvolution
         if verbose:
@@ -368,6 +376,7 @@ class MoccaDataset:
                 )
                 for id, chromatogram in zip(keys, results):
                     self.chromatograms[id] = chromatogram
+        check_nans(self)
 
         # Cluster individual peaks to build averaged compounds
         if verbose:
@@ -450,6 +459,7 @@ class MoccaDataset:
                 )
                 for id, chromatogram in zip(keys, results):
                     self.chromatograms[id] = chromatogram
+        check_nans(self)
 
         # Remove compounds that are not present
         if verbose:

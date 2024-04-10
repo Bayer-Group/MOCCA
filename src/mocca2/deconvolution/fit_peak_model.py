@@ -124,7 +124,7 @@ def fit_peak_model(
                         / (np.sum(conc * (t < mu)) + 1e-7)
                     )
                 # get the peak parameters
-                params = model.init_guess(height, mu, s1, s2)
+                params = model.init_guess(height, mu, s1 * 1.2, s2 * 1.2)
                 p0.append(params)
 
                 # substract data accounted for by the peak
@@ -162,7 +162,7 @@ def fit_peak_model(
                     )
 
                 # get initial guess
-                params = model.init_guess(height, mu, s1, s2)
+                params = model.init_guess(height, mu, s1 * 1.2, s2 * 1.2)
 
                 # make sure the initial guess is within bounds
                 for i, (low, high) in enumerate(bounds):

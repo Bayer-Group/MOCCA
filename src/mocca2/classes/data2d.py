@@ -267,12 +267,12 @@ class Data2D:
     ) -> matplotlib.axes.Axes:
         """Plots the data using matplotlib.pyplot.imshow"""
 
+        if ax is None:
+            fig, ax = plt.subplots()
+
         # draw line at 0
         if zero_line:
             ax.axhline(0, color="k", lw=0.5, alpha=0.5)
-
-        if ax is None:
-            fig, ax = plt.subplots()
 
         ax.plot(self.time, self.contract(), "-", color=color, label=label)
         ax.set_xlabel("Time [min]")

@@ -261,7 +261,7 @@ class Chromatogram(Data2D):
         """
 
         if len(self.peaks) == 0:
-            return
+            return self
 
         base_ms = np.mean([np.mean(peak.data(self.data) ** 2) for peak in self.peaks])
 
