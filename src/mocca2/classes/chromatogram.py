@@ -104,7 +104,7 @@ class Chromatogram(Data2D):
         tol: float = 1e-7,
         max_iter: int | None = None,
         smooth_wl: int | None = None,
-    ) -> None:
+    ) -> Chromatogram:
         """
         Corrects the baseline using AsLS, arPLS or FlatFit algorithm
 
@@ -131,11 +131,17 @@ class Chromatogram(Data2D):
         smooth_wl: int | None
             if specified, applies Savitzky-Golay filter (order 2) accross wavelength axis with given window size
 
+        Returns
+        -------
+        Chromatogram
+            Returns self
         """
 
         self.data -= estimate_baseline(
             self, method, smoothness, p, tol, max_iter, smooth_wl
         ).data
+
+        return self
 
     def find_peaks(
         self,
@@ -148,7 +154,7 @@ class Chromatogram(Data2D):
         split_threshold: float | None = 0.05,
         min_elution_time: float | None = None,
         max_elution_time: float | None = None,
-    ) -> None:
+    ) -> Chromatogram:
         """
         Finds all peaks in contracted data. Assumes that baseline is flat and centered around 0.
 
@@ -180,6 +186,11 @@ class Chromatogram(Data2D):
 
         max_elution_time: int | None
             if specified, peaks with maximum after `max_elution_time` are omitted
+
+        Returns
+        -------
+        Chromatogram
+            Returns self
 
         Description
         -----------
@@ -214,6 +225,8 @@ class Chromatogram(Data2D):
             ),
         )
 
+        return self
+
     def deconvolve_peaks(
         self,
         model: (
@@ -223,7 +236,7 @@ class Chromatogram(Data2D):
         min_r2: float,
         relaxe_concs: bool,
         max_comps: int,
-    ) -> None:
+    ) -> Chromatogram:
         """
         Deconvolves peaks with increasingly more components until MSE limit is reached. See `deconvolve_adaptive()` for details.
 
@@ -241,7 +254,14 @@ class Chromatogram(Data2D):
         max_comps: int
             Maximum number of components that can be fitted
 
+        Returns
+        -------
+        Chromatogram
+            Returns self
         """
+
+        if len(self.peaks) == 0:
+            return
 
         base_ms = np.mean([np.mean(peak.data(self.data) ** 2) for peak in self.peaks])
 
@@ -270,6 +290,8 @@ class Chromatogram(Data2D):
                 r2=r2,
                 resolved=max_mse > mse,
             )
+
+        return self
 
     def all_components(
         self, sort_by: Callable[[Component], Any] | None = None
@@ -384,7 +406,7 @@ class Chromatogram(Data2D):
         ),
         relaxe_concs: bool,
         min_rel_integral: float,
-    ) -> None:
+    ) -> Chromatogram:
         """
         Refines the concentration profiles using averaged spectra of the compounds.
 
@@ -446,6 +468,8 @@ class Chromatogram(Data2D):
 
         # remove peaks with no components
         self.peaks = [peak for peak in self.peaks if len(peak.components) > 0]
+
+        return self
 
     # serialization and deserialization
     def to_dict(self) -> Dict[str, Any]:
