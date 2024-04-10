@@ -3,8 +3,8 @@
 from __future__ import annotations
 from typing import Dict, Tuple, Any, List
 from numpy.typing import NDArray
-from copy import deepcopy
 
+from multiprocessing import Pool
 import pandas as pd  # type: ignore
 import numpy as np
 
@@ -34,7 +34,7 @@ class MoccaDataset:
     istd_concentrations: Dict[int, float]
     """Concentrations of internal standard [chromatogram id -> concentration]"""
 
-    istd_chromatogram: int | None
+    _istd_chromatogram: int | None
     """ID of reference chromatogram for internal standard"""
 
     istd_compound: int | None
@@ -49,7 +49,7 @@ class MoccaDataset:
         self.compounds = {}
         self.compound_references = {}
         self.istd_concentrations = {}
-        self.istd_chromatogram = None
+        self._istd_chromatogram = None
         self.istd_compound = None
         self.settings = ProcessingSettings()
 
@@ -225,29 +225,29 @@ class MoccaDataset:
                 return component.compound_id
             return None
 
-        def name_impurities_in_chromatogram(chromatogram: Chromatogram, name: str):
-            components = chromatogram.all_components(sort_by=lambda c: c.integral)
-            count = 1
-            for component in components:
-                if component.compound_id is None:
-                    continue
-                if self.compounds[component.compound_id].name is not None:
-                    continue
-                self.compounds[component.compound_id].name = name + f" impurity {count}"
-                count += 1
+        # def name_impurities_in_chromatogram(chromatogram: Chromatogram, name: str):
+        #     components = chromatogram.all_components(sort_by=lambda c: c.integral)
+        #     count = 1
+        #     for component in components:
+        #         if component.compound_id is None:
+        #             continue
+        #         if self.compounds[component.compound_id].name is not None:
+        #             continue
+        #         self.compounds[component.compound_id].name = name + f" impurity {count}"
+        #         count += 1
 
         # name ISTD
-        if self.istd_chromatogram is not None:
-            name, conc = self.compound_references[self.istd_chromatogram]
+        if self._istd_chromatogram is not None:
+            name, conc = self.compound_references[self._istd_chromatogram]
             istd_id = name_main_compound_in_chromatogram(
-                self.istd_chromatogram, name, conc
+                self._istd_chromatogram, name, conc
             )
             self.istd_compound = istd_id
 
         # Set names and conversion factors for known compounds
         for idx, (name, conc) in self.compound_references.items():
             # make sure to skip ISTD
-            if idx == self.istd_chromatogram:
+            if idx == self._istd_chromatogram:
                 continue
             name_main_compound_in_chromatogram(idx, name, conc)
 
@@ -260,9 +260,17 @@ class MoccaDataset:
             if compound.name is None:
                 compound.name = f"@ {self.time()[compound.elution_time]:0.3f}"
 
-    def process_all(self, settings: ProcessingSettings, verbose: bool = True):
+    def process_all(
+        self, settings: ProcessingSettings, verbose: bool = True, cores: int = 1
+    ):
         """Processes all chromatograms: finds and deconvolves peaks, creates averaged compounds, and refines peaks"""
         self.settings = settings
+
+        def check_nans(self):
+            if any([c is None for c in self.chromatograms.values()]):
+                raise Exception("Some chromatograms are missing")
+
+        check_nans(self)
 
         # Reset some values
         self.compounds = {}
@@ -280,45 +288,99 @@ class MoccaDataset:
             self.chromatograms[idx].time = cropped.time
             self.chromatograms[idx].wavelength = cropped.wavelength
 
+        # Baseline correction
         if verbose:
             print("Correcting baseline")
-        # Baseline correction
-        for chromatogram in self.chromatograms.values():
-            chromatogram.correct_baseline(
-                method=settings.baseline_model,
-                smoothness=settings.baseline_smoothness,
-                smooth_wl=max(len(self.wavelength()) // 20, 4),  # type: ignore
-            )
+        kwargs = {
+            "method": settings.baseline_model,
+            "smoothness": settings.baseline_smoothness,
+            "smooth_wl": max(len(self.wavelength()) // 20, 4),
+        }
+        if cores == 1:
+            for chromatogram in self.chromatograms.values():
+                chromatogram.correct_baseline(**kwargs)
+        else:
+            with Pool(cores) as p:
+                keys = list(self.chromatograms.keys())
+                results = p.starmap(
+                    _double_star_args,
+                    [
+                        (
+                            Chromatogram.correct_baseline,
+                            {"self": self.chromatograms[k], **kwargs},
+                        )
+                        for k in keys
+                    ],
+                )
+                for id, chromatogram in zip(keys, results):
+                    self.chromatograms[id] = chromatogram
+        check_nans(self)
 
+        # Peak picking
         if verbose:
             print("Picking peaks")
-        # Peak picking
-        for chromatogram in self.chromatograms.values():
-            chromatogram.find_peaks(
-                min_rel_height=settings.min_rel_prominence,
-                min_height=settings.min_prominence,
-                width_at=settings.border_max_peak_cutoff,
-                split_threshold=settings.split_threshold,
-                min_elution_time=settings.min_elution_time,
-                max_elution_time=settings.max_elution_time,
-            )
+        kwargs = {
+            "min_rel_height": settings.min_rel_prominence,
+            "min_height": settings.min_prominence,
+            "width_at": settings.border_max_peak_cutoff,
+            "split_threshold": settings.split_threshold,
+            "min_elution_time": settings.min_elution_time,
+            "max_elution_time": settings.max_elution_time,
+        }
+        if cores == 1:
+            for chromatogram in self.chromatograms.values():
+                chromatogram.find_peaks(**kwargs)
+        else:
+            with Pool(cores) as p:
+                keys = list(self.chromatograms.keys())
+                results = p.starmap(
+                    _double_star_args,
+                    [
+                        (
+                            Chromatogram.find_peaks,
+                            {"self": self.chromatograms[k], **kwargs},
+                        )
+                        for k in keys
+                    ],
+                )
+                for id, chromatogram in zip(keys, results):
+                    self.chromatograms[id] = chromatogram
+        check_nans(self)
 
+        # Initial deconvolution
         if verbose:
             print("Deconvolution")
-        # Initial deconvolution
-        for idx, chromatogram in enumerate(self.chromatograms.values()):
-            if verbose:
-                print(f"Chromatogram {idx+1}/{len(self.chromatograms)}")
-            chromatogram.deconvolve_peaks(
-                model=settings.peak_model,
-                min_r2=settings.explained_threshold,
-                relaxe_concs=settings.relaxe_concs,
-                max_comps=settings.max_peak_comps,
-            )
+        kwargs = {
+            "model": settings.peak_model,
+            "min_r2": settings.explained_threshold,
+            "relaxe_concs": settings.relaxe_concs,
+            "max_comps": settings.max_peak_comps,
+        }
+        if cores == 1:
+            for idx, chromatogram in enumerate(self.chromatograms.values()):
+                if verbose:
+                    print(f"Chromatogram {idx+1}/{len(self.chromatograms)}")
+                chromatogram.deconvolve_peaks(**kwargs)
+        else:
+            with Pool(cores) as p:
+                keys = list(self.chromatograms.keys())
+                results = p.starmap(
+                    _double_star_args,
+                    [
+                        (
+                            Chromatogram.deconvolve_peaks,
+                            {"self": self.chromatograms[k], **kwargs},
+                        )
+                        for k in keys
+                    ],
+                )
+                for id, chromatogram in zip(keys, results):
+                    self.chromatograms[id] = chromatogram
+        check_nans(self)
 
+        # Cluster individual peaks to build averaged compounds
         if verbose:
             print("Clustering compounds")
-        # Cluster individual peaks to build averaged compounds
         components = [
             component
             for chromatogram in self.chromatograms.values()
@@ -370,21 +432,38 @@ class MoccaDataset:
             components, are_same=are_same_compound, weights=importance
         )
 
+        # Refine peaks
         if verbose:
             print("Refining peaks")
-        # Refine peaks
-        for chromatogram in self.chromatograms.values():
-            chromatogram.refine_peaks(
-                self.compounds,
-                settings.peak_model,
-                settings.relaxe_concs,
-                settings.explained_threshold,
-                settings.min_rel_integral,
-            )
+        kwargs = {
+            "compounds": self.compounds,
+            "model": settings.peak_model,
+            "relaxe_concs": settings.relaxe_concs,
+            "min_rel_integral": settings.min_rel_integral,
+        }
+        if cores == 1:
+            for chromatogram in self.chromatograms.values():
+                chromatogram.refine_peaks(**kwargs)
+        else:
+            with Pool(cores) as p:
+                keys = list(self.chromatograms.keys())
+                results = p.starmap(
+                    _double_star_args,
+                    [
+                        (
+                            Chromatogram.refine_peaks,
+                            {"self": self.chromatograms[k], **kwargs},
+                        )
+                        for k in keys
+                    ],
+                )
+                for id, chromatogram in zip(keys, results):
+                    self.chromatograms[id] = chromatogram
+        check_nans(self)
 
+        # Remove compounds that are not present
         if verbose:
             print("Naming compounds")
-        # Remove compounds that are not present
         present = set()
         for chromatogram in self.chromatograms.values():
             for component in chromatogram.all_components():
@@ -566,7 +645,7 @@ class MoccaDataset:
             "compounds": {k: v.to_dict() for k, v in self.compounds.items()},
             "compound_references": self.compound_references,
             "istd_concentrations": self.istd_concentrations,
-            "istd_chromatogram": self.istd_chromatogram,
+            "istd_chromatogram": self._istd_chromatogram,
             "istd_compound": self.istd_compound,
             "settings": self.settings.to_dict(),
         }
@@ -589,7 +668,11 @@ class MoccaDataset:
         }
         dataset.compound_references = data["compound_references"]
         dataset.istd_concentrations = data["istd_concentrations"]
-        dataset.istd_chromatogram = data["istd_chromatogram"]
+        dataset._istd_chromatogram = data["istd_chromatogram"]
         dataset.istd_compound = data["istd_compound"]
         dataset.settings = ProcessingSettings.from_dict(data["settings"])
         return dataset
+
+
+def _double_star_args(func, kwargs):
+    return func(**kwargs)

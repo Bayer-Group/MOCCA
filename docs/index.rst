@@ -43,6 +43,7 @@ Contents
    ex_basic_data
    ex_baseline
    ex_peak_picking
+   ex_batch_processing
 
 .. toctree::
    :maxdepth: 1

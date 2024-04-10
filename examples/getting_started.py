@@ -1,3 +1,5 @@
+# See detailed description for this example in docs
+
 from mocca2 import example_data
 from matplotlib import pyplot as plt
 
