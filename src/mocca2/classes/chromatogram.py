@@ -454,7 +454,7 @@ class Chromatogram(Data2D):
 
         # remove components with insufficient integrals
         min_integral = (
-            max([component.integral for component in self.all_components()])
+            max([0] + [component.integral for component in self.all_components()])
             * min_rel_integral
         )
 

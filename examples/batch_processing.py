@@ -49,7 +49,7 @@ settings = ProcessingSettings(
 )
 
 # Process the dataset
-dataset.process_all(settings, verbose=True, cores=14)
+dataset.process_all(settings, verbose=True, cores=15)
 
 # Get concentrations relative to the internal standard
 print(dataset.get_concentrations()[0].to_string(index=False))
