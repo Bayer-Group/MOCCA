@@ -89,7 +89,7 @@ Processing the dataset is a one-liner. It is possible to parallelize the process
     # Process the dataset
     dataset.process_all(settings, verbose=True, cores=15)
 
-Running this command can take around 5 minutes.
+Processing the ~ 90 chromatograms can take around 10 minutes on a modern computer.
 
 .. code-block::
 

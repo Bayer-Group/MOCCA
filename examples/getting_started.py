@@ -19,7 +19,7 @@ chromatogram.extract_wavelength(220, None, inplace=True)
 chromatogram.find_peaks(min_height=2)
 
 # Deconvolve the peaks
-print("Deconvolving peaks, this migth take a minute...")
+print("Deconvolving peaks, this might take a minute...")
 
 chromatogram.deconvolve_peaks(
     model="FraserSuzuki", min_r2=0.999, relaxe_concs=False, max_comps=5

@@ -14,7 +14,7 @@ chromatogram.find_peaks()
 
 # Plot chromatogram with the peaks
 chromatogram.plot()
-plt.savefig("docs/_static/ex_peak_picking_initial.svg")
+# plt.savefig("docs/_static/ex_peak_picking_initial.svg")
 plt.show()
 
 # It is possible to adjust the threshold to pick even the smaller peaks
@@ -22,7 +22,7 @@ chromatogram.find_peaks(min_height=1)
 
 # Let's see the chromatogram again
 chromatogram.plot()
-plt.savefig("docs/_static/ex_peak_picking_adjusted.svg")
+# plt.savefig("docs/_static/ex_peak_picking_adjusted.svg")
 plt.show()
 
 # As you can see, some the algorithm detected that some peaks overlap
@@ -36,7 +36,7 @@ chromatogram.deconvolve_peaks(
 
 # And plot the chromatogram again
 chromatogram.plot()
-plt.savefig("docs/_static/ex_peak_picking_deconvolved.svg")
+# plt.savefig("docs/_static/ex_peak_picking_deconvolved.svg")
 plt.show()
 
 # Finally, let's get all the components and calculate their area %
