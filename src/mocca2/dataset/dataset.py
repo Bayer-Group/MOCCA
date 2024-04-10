@@ -34,7 +34,7 @@ class MoccaDataset:
     istd_concentrations: Dict[int, float]
     """Concentrations of internal standard [chromatogram id -> concentration]"""
 
-    istd_chromatogram: int | None
+    _istd_chromatogram: int | None
     """ID of reference chromatogram for internal standard"""
 
     istd_compound: int | None
@@ -49,7 +49,7 @@ class MoccaDataset:
         self.compounds = {}
         self.compound_references = {}
         self.istd_concentrations = {}
-        self.istd_chromatogram = None
+        self._istd_chromatogram = None
         self.istd_compound = None
         self.settings = ProcessingSettings()
 
@@ -237,17 +237,17 @@ class MoccaDataset:
                 count += 1
 
         # name ISTD
-        if self.istd_chromatogram is not None:
-            name, conc = self.compound_references[self.istd_chromatogram]
+        if self._istd_chromatogram is not None:
+            name, conc = self.compound_references[self._istd_chromatogram]
             istd_id = name_main_compound_in_chromatogram(
-                self.istd_chromatogram, name, conc
+                self._istd_chromatogram, name, conc
             )
             self.istd_compound = istd_id
 
         # Set names and conversion factors for known compounds
         for idx, (name, conc) in self.compound_references.items():
             # make sure to skip ISTD
-            if idx == self.istd_chromatogram:
+            if idx == self._istd_chromatogram:
                 continue
             name_main_compound_in_chromatogram(idx, name, conc)
 
@@ -375,11 +375,10 @@ class MoccaDataset:
         # Refine peaks
         for chromatogram in self.chromatograms.values():
             chromatogram.refine_peaks(
-                self.compounds,
-                settings.peak_model,
-                settings.relaxe_concs,
-                settings.explained_threshold,
-                settings.min_rel_integral,
+                compounds=self.compounds,
+                model=settings.peak_model,
+                relaxe_concs=settings.relaxe_concs,
+                min_rel_integral=settings.min_rel_integral,
             )
 
         if verbose:
@@ -566,7 +565,7 @@ class MoccaDataset:
             "compounds": {k: v.to_dict() for k, v in self.compounds.items()},
             "compound_references": self.compound_references,
             "istd_concentrations": self.istd_concentrations,
-            "istd_chromatogram": self.istd_chromatogram,
+            "istd_chromatogram": self._istd_chromatogram,
             "istd_compound": self.istd_compound,
             "settings": self.settings.to_dict(),
         }
@@ -589,7 +588,7 @@ class MoccaDataset:
         }
         dataset.compound_references = data["compound_references"]
         dataset.istd_concentrations = data["istd_concentrations"]
-        dataset.istd_chromatogram = data["istd_chromatogram"]
+        dataset._istd_chromatogram = data["istd_chromatogram"]
         dataset.istd_compound = data["istd_compound"]
         dataset.settings = ProcessingSettings.from_dict(data["settings"])
         return dataset

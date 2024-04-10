@@ -297,18 +297,30 @@ def cyanation(
     else:
         blank = None
 
-    chromatograms["istd"] = Chromatogram(filename("istd_96"), blank)
-    chromatograms["educt_1"] = Chromatogram(filename("educt_88"), blank)
-    chromatograms["educt_2"] = Chromatogram(filename("educt_89"), blank)
-    chromatograms["product_1"] = Chromatogram(filename("product_92"), blank)
-    chromatograms["product_2"] = Chromatogram(filename("product_93"), blank)
-    chromatograms["cn_source_a"] = Chromatogram(filename("cnsource_a_98"), blank)
-    chromatograms["cn_source_d"] = Chromatogram(filename("cnsource_d_99"), blank)
+    chromatograms["istd"] = Chromatogram(filename("istd_96"), blank, name="istd")
+    chromatograms["educt_1"] = Chromatogram(filename("educt_88"), blank, name="educt_1")
+    chromatograms["educt_2"] = Chromatogram(filename("educt_89"), blank, name="educt_2")
+    chromatograms["product_1"] = Chromatogram(
+        filename("product_92"), blank, name="product_1"
+    )
+    chromatograms["product_2"] = Chromatogram(
+        filename("product_93"), blank, name="product_2"
+    )
+    chromatograms["cn_source_a"] = Chromatogram(
+        filename("cnsource_a_98"), blank, name="cn_source_a"
+    )
+    chromatograms["cn_source_d"] = Chromatogram(
+        filename("cnsource_d_99"), blank, name="cn_source_d"
+    )
 
     chromatograms["reactions"] = []
     for i in range(84):
         chromatograms["reactions"].append(
-            Chromatogram(filename(f"sample_{i+4:d}"), blank)
+            Chromatogram(
+                filename(f"sample_{i+4:d}"),
+                blank,
+                name=f"reaction_{i+1:d}",
+            )
         )
 
     return chromatograms
