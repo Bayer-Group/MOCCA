@@ -1,0 +1,64 @@
+# Compress and deploy example data
+name: Example Data
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "example-data"
+  cancel-in-progress: false
+
+jobs:
+  compress-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      # Compress the data
+      - name: Compress the data
+        run: |
+          cd src/mocca2/example_data/data/
+          for dir in $(ls); do
+            tar -cjf $dir.tar.bz2 $dir
+          done
+          cd ../../../../
+          mkdir _temp
+          mv src/mocca2/example_data/data/*.tar.bz2 _temp/
+
+      # Configure Git, Important for actions to commit
+      - name: Configure Git
+        run: |
+          git config --global user.email "jan.oboril@gmail.com"
+          git config --global user.name "Jan Oboril"
+
+      # Check if branch exists and create or clean it
+      - name: Prepare Branch
+        run: |
+          git checkout -b example-data
+          git pull origin example-data --rebase|| true
+
+
+      # Add the compressed data file
+      - name: Add Compressed Data and Commit
+        run: |
+          git rm -rf .
+          ls
+          mv _temp/* .
+          rmdir _temp
+          git add *.tar.bz2
+          echo -e "# Example Data\nThese archives contain various example chromatograms. You can use them from mocca2 package using \`mocca2.example_data\` module after downloading them using \`python -m mocca2 --download-data\`.\n\nThis data is automatically generated, do not edit manually." > README.md
+          git add README.md
+          git commit -m "Added compressed example data"
+
+      # Push the branch to remote
+      - name: Push Changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: example-data

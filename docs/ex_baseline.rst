@@ -5,60 +5,65 @@ Baseline correction is often overlooked, but it is crucial for accurate peak mod
 
 First let's import MOCCA2.
 
-.. code-block:: Python
+.. code-block:: python
 
-    from mocca2 import Chromatogram, estimate_baseline
+    from mocca2 import example_data, estimate_baseline
     from matplotlib import pyplot as plt
 
-The best way to correct baseline is using blank, and then by refining the baseline. This is a two-liner:
+The best way to correct baseline is using blank, and then by refining the baseline.
 
-.. code-block:: Python
+.. code-block:: python
 
-    # Load sample chromatogram and substract blank
-    chromatogram = Chromatogram(
-        'tests/test_data/tripeak.arw',
-        blank='tests/test_data/tripeak_blank.arw'
-    )
+    # Load example chromatogram
+    chromatogram = example_data.example_1(substract_blank=True)
 
     # Refine the baseline
     chromatogram.correct_baseline()
 
-    # Plotting the chromatogram with corrected baseline
-    plt.figure()
-    plt.plot(chromatogram.time, chromatogram.contract())
-    plt.xlabel('Time [min]')
-    plt.ylabel('Average absorbance [mAU]')
-    plt.xlim(chromatogram.time[0], chromatogram.time[-1])
+    # Load the chromatogram without baseline correction and without blank subtraction
+    chromatogram_no_baseline = example_data.example_1(substract_blank=True)
+    chromatogram_no_blank = example_data.example_1(substract_blank=False)
+
+    # Plot the chromatogram with corrected baseline
+    fig, ax = plt.subplots(figsize=(8, 5))
+    chromatogram_no_blank.plot(ax, color="green", label="No blank subtraction")
+    chromatogram_no_baseline.plot(ax, color="red", label="No baseline correction")
+    chromatogram.plot(ax, label="Corrected")
+
+    plt.legend()
+    # plt.savefig("docs/_static/ex_baseline_corrected.svg")
+    plt.show()
 
 .. image:: _static/ex_baseline_corrected.svg
 
 We can also take a look onto different algorightms for baseline estimation.
 Let's pretend we don't have the blank run, so that we can compare it to the estimated baseline.
 
-.. code-block:: Python
+.. code-block:: python
 
-    # Load and average data
-    chromatogram = Chromatogram('tests/test_data/tripeak.arw')
-    averaged = chromatogram.contract()
-    averaged_blank = Chromatogram('tests/test_data/tripeak_blank.arw').contract()
+    # Load example chromatogram
+    chromatogram = example_data.example_1(substract_blank=False)
+
+    # To make things faster, lets average absorbance over all wavelengths
+    mean_absorbance = chromatogram.contract()
 
     # Estimate baseline using different methods
-    baseline_asls = estimate_baseline(averaged, method='asls')
-    baseline_arpls = estimate_baseline(averaged, method='arpls')
-    baseline_flatfit = estimate_baseline(averaged, method='flatfit')
+    baseline_asls = estimate_baseline(mean_absorbance, method="asls")
+    baseline_arpls = estimate_baseline(mean_absorbance, method="arpls")
+    baseline_flatfit = estimate_baseline(mean_absorbance, method="flatfit")
 
     # Plot the result
-    plt.figure()
-    plt.plot(chromatogram.time, averaged, label='Raw data', lw=1.)
-    plt.plot(chromatogram.time, averaged_blank, label='Blank', lw=1.)
-    plt.plot(chromatogram.time, baseline_asls, label='ASLS baseline', lw=1.)
-    plt.plot(chromatogram.time, baseline_arpls, label='arPLS baseline', lw=1.)
-    plt.plot(chromatogram.time, baseline_flatfit, label='FlatFit baseline', lw=1.)
-    plt.xlabel('Time [min]')
-    plt.ylabel('Average absorbance [mAU]')
-    plt.xlim(chromatogram.time[0], chromatogram.time[-1])
-    plt.ylim(-30, 100)
+    fig, ax = plt.subplots(figsize=(8, 5))
+
+    chromatogram.plot(ax, label="Original")
+    ax.plot(chromatogram.time, baseline_arpls, label="AsLS")
+    ax.plot(chromatogram.time, baseline_asls, label="arPLS")
+    ax.plot(chromatogram.time, baseline_flatfit, label="FlatFit")
+
+    ax.set_ylim(-30, 75)
     plt.legend()
+    # plt.savefig("docs/_static/ex_baseline_comparison.svg")
+    plt.show()
 
 .. image:: _static/ex_baseline_comparison.svg
 
@@ -70,4 +75,4 @@ A few remarks:
 
 For not-very-noisy data, I would recommend using FlatFit. It is very fast and stable algorithm which can also handle negative peaks.
 
-The description of individual methods is described in the :ref:`baseline <ref_baseline>` reference.
+The description of individual methods is in the :ref:`baseline <ref_baseline>` reference.
