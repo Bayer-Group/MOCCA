@@ -13,21 +13,25 @@ In general, I would recommend using FlatFit. If your data is very noisy, arPLS s
 
 estimate_baseline()
 ~~~~~~~~~~~~~~~~~~~
+This is a wrapper for the baseline estimation algorithms :func:`asls()<mocca2.baseline.asls.asls>`, :func:`arpls()<mocca2.baseline.arpls.arpls>` and :func:`flatfit()<mocca2.baseline.flatfit.flatfit>`.
 
 .. autofunction:: mocca2.estimate_baseline
 
-asls()
+AsLS()
 ~~~~~~
+**As**\ ymmetric **L**\ east **S**\ quares with smoothness penalty.
 
 .. autofunction:: mocca2.baseline.asls.asls
 
-arpls()
+arPLS()
 ~~~~~~~
+**A**\ symmetrically **r**\ eweighted **P**\ enalized **L**\ east **S**\ quares ith smoothness penalty..
 
 .. autofunction:: mocca2.baseline.arpls.arpls
 
 
-flatfit()
+FlatFit()
 ~~~~~~~~~
+FlatFit algorithm with smoothness penalty. The details will be published soon in the MOCCA2 paper.
 
 .. autofunction:: mocca2.baseline.flatfit.flatfit

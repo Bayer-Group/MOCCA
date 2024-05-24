@@ -1,10 +1,32 @@
-.. MOCCA2 documentation master file, created by
-   sphinx-quickstart on Mon Aug 21 14:18:07 2023.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to MOCCA2!
 ==================
+
+MOCCA2 is a Python package for automatic processing of HPLC chromatograms.
+
+To automate your workflow and get accurate results, MOCCA2 features:
+ - support for raw data files from Agilent, Shimadzu and Waters
+ - automatic baseline correction
+ - adaptive peak picking
+ - automatic purity checking and peak deconvolution
+ - compound tracking across chromatograms
+ - fully automatic processing of any number of chromatograms
+
+Getting Started
+---------------
+
+`Get started <installation.html>`_ by installing MOCCA2 and processing your first chromatogram!
+
+Publications and MOCCA
+----------------------
+
+This package is based on `MOCCA <https://github.com/HaasCP/mocca>`_ package by `HaasCP <https://github.com/HaasCP>`_. This work has been published by `Christian Haas et al. in 2023 <https://doi.org/10.1021/acscentsci.2c01042>`_.
+
+Inspired by MOCCA, MOCCA2 features more Pythonic interface as well as adaptive and more accurate algorithms.
+
+Publication featuring MOCCA2 is coming soon!
+
+Contents
+========
 
 .. toctree::
    :maxdepth: 1
@@ -21,6 +43,7 @@ Welcome to MOCCA2!
    ex_basic_data
    ex_baseline
    ex_peak_picking
+   ex_batch_processing
 
 .. toctree::
    :maxdepth: 1
@@ -34,10 +57,9 @@ Welcome to MOCCA2!
    ref_peak
    ref_deconvolution
    ref_clustering
+   ref_example_data
 
-Indices and tables
-==================
+Contributing
+============
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+Please see the `Contributing Guide <https://github.com/Bayer-Group/MOCCA/blob/main/CONTRIBUTING.md>`_.
