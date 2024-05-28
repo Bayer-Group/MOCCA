@@ -1,5 +1,8 @@
-__pycache__
-.mypy_cache
-_build
-\.idea
+venv
+**__pycache__
+docs/_build
+build
+src/*.egg-info
+.pytest_cache
 \.ipynb_checkpoints
+\.idea

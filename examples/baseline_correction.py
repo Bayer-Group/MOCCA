@@ -1,48 +1,50 @@
 # See detailed description for this example in docs
 
-from mocca2 import Chromatogram, estimate_baseline
+from mocca2 import example_data, estimate_baseline
 from matplotlib import pyplot as plt
 
-# Load sample chromatogram and substract blank
-chromatogram = Chromatogram(
-    'tests/test_data/tripeak.arw',
-    blank='tests/test_data/tripeak_blank.arw'
-)
+# Load example chromatogram
+chromatogram = example_data.example_1(substract_blank=True)
 
 # Refine the baseline
 chromatogram.correct_baseline()
 
-# Plotting the chromatogram with corrected baseline
-plt.figure()
-plt.plot(chromatogram.time, chromatogram.contract())
-plt.xlabel('Time [min]')
-plt.ylabel('Average absorbance [mAU]')
-plt.xlim(chromatogram.time[0], chromatogram.time[-1])
+# Load the chromatogram without baseline correction and without blank subtraction
+chromatogram_no_baseline = example_data.example_1(substract_blank=True)
+chromatogram_no_blank = example_data.example_1(substract_blank=False)
 
-# But we can explore different baseline correction algorithms
-# Let's use only averaged absorbance
+# Plot the chromatogram with corrected baseline
+fig, ax = plt.subplots(figsize=(8, 5))
+chromatogram_no_blank.plot(ax, color="green", label="No blank subtraction")
+chromatogram_no_baseline.plot(ax, color="red", label="No baseline correction")
+chromatogram.plot(ax, label="Corrected")
 
-# Load and average data
-chromatogram = Chromatogram('tests/test_data/tripeak.arw')
-averaged = chromatogram.contract()
-averaged_blank = Chromatogram('tests/test_data/tripeak_blank.arw').contract()
+plt.legend()
+# plt.savefig("docs/_static/ex_baseline_corrected.svg")
+plt.show()
+
+# We can explore different baseline correction algorithms
+
+# Load example chromatogram
+chromatogram = example_data.example_1(substract_blank=False)
+
+# To make things faster, lets average absorbance over all wavelengths
+mean_absorbance = chromatogram.contract()
 
 # Estimate baseline using different methods
-baseline_asls = estimate_baseline(averaged, method='asls')
-baseline_arpls = estimate_baseline(averaged, method='arpls')
-baseline_flatfit = estimate_baseline(averaged, method='flatfit')
+baseline_asls = estimate_baseline(mean_absorbance, method="asls")
+baseline_arpls = estimate_baseline(mean_absorbance, method="arpls")
+baseline_flatfit = estimate_baseline(mean_absorbance, method="flatfit")
 
 # Plot the result
-plt.figure()
-plt.plot(chromatogram.time, averaged, label='Raw data', lw=1.)
-plt.plot(chromatogram.time, averaged_blank, label='Blank', lw=1.)
-plt.plot(chromatogram.time, baseline_asls, label='ASLS baseline', lw=1.)
-plt.plot(chromatogram.time, baseline_arpls, label='arPLS baseline', lw=1.)
-plt.plot(chromatogram.time, baseline_flatfit, label='FlatFit baseline', lw=1.)
-plt.xlabel('Time [min]')
-plt.ylabel('Average absorbance [mAU]')
-plt.xlim(chromatogram.time[0], chromatogram.time[-1])
-plt.ylim(-30, 100)
-plt.legend()
+fig, ax = plt.subplots(figsize=(8, 5))
 
+chromatogram.plot(ax, label="Original")
+ax.plot(chromatogram.time, baseline_arpls, label="AsLS")
+ax.plot(chromatogram.time, baseline_asls, label="arPLS")
+ax.plot(chromatogram.time, baseline_flatfit, label="FlatFit")
+
+ax.set_ylim(-30, 75)
+plt.legend()
+# plt.savefig("docs/_static/ex_baseline_comparison.svg")
 plt.show()
