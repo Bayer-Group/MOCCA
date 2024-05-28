@@ -1,7 +1,0 @@
-improve the logic behind automatic dataset processing !!!
-better weight for compound averaging
-some smarter way for compound selection for postprocessing
-
-make dataset process_all code nice
-peak postprocessing is not implemented
-the peak/compound clustering must be improved
