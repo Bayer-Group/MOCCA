@@ -38,7 +38,7 @@ class ProcessingSettings:
     """Peaks with maxima before this time will not be considered"""
     max_elution_time: float = 10.0
     """Peaks with maxima after this time will not be considered"""
-    min_wavelength: float = 220.0
+    min_wavelength: float = 210.0
     """The data will be cropped such that lower wavelengths are not included"""
     max_wavelength: float = 400.0
     """The data will be cropped such that higher wavelengths are not included"""

@@ -528,9 +528,7 @@ class MoccaDataset:
 
     def get_concentrations(self) -> Tuple[pd.DataFrame, List[int]]:
         """
-        Calculates integrals or concentrations of deconvolved peaks.
-
-        If compound has `concentration_factor` specified, the integrals are multiplied by this factor
+        Calculates concentrations of deconvolved peaks based on specified `concentration_factor`
 
         Returns
         -------
@@ -560,22 +558,28 @@ class MoccaDataset:
             name = self.compounds[c_id].name
             conc_factor = self.compounds[c_id].concentration_factor
             if conc_factor is None:
-                conc_factor = 1.0
-            column_names.append(name)
-            columns.append(
-                [
-                    None if c_id not in ints else ints[c_id] * conc_factor
-                    for ints in integrals
-                ]
-            )
+                column_names.append(name)
+                columns.append(
+                    [
+                        None for ints in integrals
+                    ]
+                )
+            else:                
+                column_names.append(name)
+                columns.append(
+                    [
+                        None if c_id not in ints else ints[c_id] * conc_factor
+                        for ints in integrals
+                    ]
+                )
 
-        df = pd.DataFrame(zip(*columns), columns=column_names)
+        df = pd.DataFrame(zip(*columns), columns=column_names).dropna(axis=1, how='all')
 
         return df, compound_ids
 
     def get_relative_concentrations(self) -> Tuple[pd.DataFrame, List[int]]:
         """
-        Calculates integrals or concentrations of deconvolved peaks relative to internal standard.
+        Calculates concentrations of deconvolved peaks relative to internal standard.
 
         If compound has `concentration_factor` specified, the integrals are multiplied by this factor
 
@@ -611,6 +615,119 @@ class MoccaDataset:
         for idx, ch_id in enumerate(columns[0]):
             if ch_id in self.istd_concentrations:
                 istd_conc = self.istd_concentrations[ch_id]
+                for key in integrals[idx]:
+                    integrals[idx][key] *= istd_conc
+            else:
+                for key in integrals[idx]:
+                    integrals[idx][key] = None
+
+        compound_ids = sorted(
+            self.compounds.keys(), key=lambda c_id: self.compounds[c_id].elution_time
+        )
+
+        # put all results into dataframe
+        for c_id in compound_ids:
+            name = self.compounds[c_id].name
+            conc_factor = self.compounds[c_id].concentration_factor_vs_istd
+            if conc_factor is None:
+                column_names.append(name)
+                columns.append(
+                [
+                    None for ints in integrals
+                ]
+                )
+            else:
+                column_names.append(name)
+                columns.append(
+                    [
+                        None if c_id not in ints else ints[c_id] * conc_factor
+                        for ints in integrals
+                    ]
+                )
+
+        df = pd.DataFrame(zip(*columns), columns=column_names).dropna(axis=1, how='all')
+
+        return df, compound_ids
+
+
+    def get_integrals(self) -> Tuple[pd.DataFrame, List[int]]:
+        """
+        Calculates integrals of deconvolved peaks.
+
+        Returns
+        -------
+
+        pd.DataFrame
+            The columns of the dataframe are: 'Chromatogram ID', 'Chromatogram', and names of compounds
+
+        List[int]
+            IDs of compounds in the same order as in DataFrame
+
+        """
+
+        columns = [
+            list(self.chromatograms.keys()),
+            [chrom.name for chrom in self.chromatograms.values()],
+        ]
+
+        column_names = ["Chromatogram ID", "Chromatogram"]
+
+        integrals = [chrom.get_integrals() for chrom in self.chromatograms.values()]
+
+        compound_ids = sorted(
+            self.compounds.keys(), key=lambda c_id: self.compounds[c_id].elution_time
+        )
+
+        for c_id in compound_ids:
+            name = self.compounds[c_id].name
+            column_names.append(name)
+            columns.append(
+                [
+                    None if c_id not in ints else ints[c_id]
+                    for ints in integrals
+                ]
+            )
+
+        df = pd.DataFrame(zip(*columns), columns=column_names)
+
+        return df, compound_ids
+
+    def get_relative_integrals(self) -> Tuple[pd.DataFrame, List[int]]:
+        """
+        Calculates integrals of deconvolved peaks relative to internal standard.
+
+        Returns
+        -------
+
+        pd.DataFrame
+            The columns of the dataframe are: 'Chromatogram ID', 'Chromatogram', and names of compounds
+
+        List[int]
+            IDs of compounds in the same order as in DataFrame
+
+        """
+
+        assert (
+            self.istd_compound is not None
+        ), "Cannot calculate relative integrals, the internal standard is not specified"
+
+        columns = [
+            list(self.chromatograms.keys()),
+            [chrom.name for chrom in self.chromatograms.values()],
+        ]
+
+        column_names = ["Chromatogram ID", "Chromatogram"]
+
+        # Get relative integrals (compound_integral / ISTD_integral)
+        integrals = [
+            chrom.get_relative_integrals(self.istd_compound)
+            for chrom in self.chromatograms.values()
+        ]
+
+        # Scale the integrals by given ISTD concentration
+        for idx, ch_id in enumerate(columns[0]):
+            if ch_id in self.istd_concentrations:
+                istd_conc = self.istd_concentrations[ch_id]
             else:
                 istd_conc = 1.0
             for key in integrals[idx]:
@@ -623,13 +740,10 @@ class MoccaDataset:
         # put all results into dataframe
         for c_id in compound_ids:
             name = self.compounds[c_id].name
-            conc_factor = self.compounds[c_id].concentration_factor_vs_istd
-            if conc_factor is None:
-                conc_factor = 1.0
             column_names.append(name)
             columns.append(
                 [
-                    None if c_id not in ints else ints[c_id] * conc_factor
+                    None if c_id not in ints else ints[c_id]
                     for ints in integrals
                 ]
             )
