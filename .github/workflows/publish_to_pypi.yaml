@@ -74,14 +74,15 @@ jobs:
         inputs: >-
           ./dist/*.tar.gz
           ./dist/*.whl
-    - name: Create GitHub Release
+    - name: Create or Update GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
       run: >-
-        gh release create
-        '${{ github.ref_name }}'
-        --repo '${{ github.repository }}'
-        --notes ""
+        if gh release view '${{ github.ref_name }}' --repo '${{ github.repository }}' > /dev/null 2>&1; then
+          gh release edit '${{ github.ref_name }}' --repo '${{ github.repository }}' --notes ""
+        else
+          gh release create '${{ github.ref_name }}' --repo '${{ github.repository }}' --notes ""
+        fi
     - name: Upload artifact signatures to GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
