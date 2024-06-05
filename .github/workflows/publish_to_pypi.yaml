@@ -20,6 +20,7 @@ jobs:
     - name: Install pypa/build
       run: |
         pip install build
+        pip install securesystemslib==0.31.0
     - name: Build a binary wheel and a source tarball
       run: python3 -m build
     - name: Store the distribution packages
