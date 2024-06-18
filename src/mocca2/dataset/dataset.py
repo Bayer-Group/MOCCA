@@ -568,7 +568,7 @@ class MoccaDataset:
                 column_names.append(name)
                 columns.append(
                     [
-                        None if c_id not in ints else ints[c_id] * conc_factor
+                        None if c_id not in ints or ints[c_id] is None else ints[c_id] * conc_factor
                         for ints in integrals
                     ]
                 )
@@ -640,7 +640,7 @@ class MoccaDataset:
                 column_names.append(name)
                 columns.append(
                     [
-                        None if c_id not in ints else ints[c_id] * conc_factor
+                        None if c_id not in ints or ints[c_id] is None else ints[c_id] * conc_factor
                         for ints in integrals
                     ]
                 )
