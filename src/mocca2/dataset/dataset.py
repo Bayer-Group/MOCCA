@@ -295,7 +295,7 @@ class MoccaDataset:
         kwargs = {
             "method": settings.baseline_model,
             "smoothness": settings.baseline_smoothness,
-            "smooth_wl": max(len(self.wavelength()) // 20, 4),
+            "smooth_wl": max(len(self.wavelength()) // 20, 4) if len(self.wavelength()) >= 4 else None,
         }
         if cores == 1:
             for chromatogram in self.chromatograms.values():
