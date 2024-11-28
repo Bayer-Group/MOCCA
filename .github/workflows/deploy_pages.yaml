@@ -57,7 +57,7 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Download the pages
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4.1.7
         with:
           name: html-pages
           path: html/
