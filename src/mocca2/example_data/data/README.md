@@ -4,7 +4,7 @@ The archives in this branch contain various example chromatogram datasets.
 
 You can use them from mocca2 package using `mocca2.example_data` module after downloading them using `python -m mocca2 --download-data`.
 
-See detailed documentation in the [docs](https://oboril.github.io/MOCCA/ref_example_data.html).
+See detailed documentation in the [docs](https://bayer-group.github.io/MOCCA/ref_example_data.html).
 
 ## Datasets
 

@@ -85,7 +85,7 @@ This repository automates numerous workflows:
 On push to `main`, all tests in the `tests` directory are automatically run. Currently, MOCCA2 is tested on Ubuntu with Python 3.10, 3.11 and 3.12.
 
 ### Docs
-On push to `main`, the Sphinx docs are automatically compiled and published to [GitHub pages](https://bayer-group.github.io/mocca).
+On push to `main`, the Sphinx docs are automatically compiled and published to [GitHub pages](https://bayer-group.github.io/MOCCA).
 
 ### Example data
 The repository contains various example datasets:
