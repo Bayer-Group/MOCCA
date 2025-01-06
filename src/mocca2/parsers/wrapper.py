@@ -5,7 +5,7 @@ from mocca2.parsers.empower import parse_empower
 from mocca2.parsers.chemstation import parse_chemstation
 from mocca2.parsers.labsolutions import parse_labsolutions
 
-def load_data2d(path: str, format: Literal['auto', 'empower', 'chemstation', 'labsolutions'] = 'auto') -> Data2D:
+def load_data2d(path: str, format: Literal['auto', 'empower', 'chemstation', 'labsolutions'] = 'auto', encoding = 'utf-16') -> Data2D:
     """
     Loads empower/chemstation/labsolutions file, returns 2D data
 
@@ -31,7 +31,7 @@ def load_data2d(path: str, format: Literal['auto', 'empower', 'chemstation', 'la
         if path.lower().endswith('.arw'):
             data = parse_empower(path)
         elif path.lower().endswith('.csv') or path.lower().endswith('.d'):
-            data = parse_chemstation(path)
+            data = parse_chemstation(path, encoding=encoding)
         elif path.lower().endswith('.txt'):
             data = parse_labsolutions(path)
         else:
@@ -39,7 +39,7 @@ def load_data2d(path: str, format: Literal['auto', 'empower', 'chemstation', 'la
     elif format == 'empower':
         data = parse_empower(path)
     elif format == 'chemstation':
-        data = parse_chemstation(path)
+        data = parse_chemstation(path, encoding=encoding)
     elif format == 'labsolutions':
         data = parse_labsolutions(path)
         
