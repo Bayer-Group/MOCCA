@@ -8,7 +8,7 @@
 MOCCA2 is a Python package for automatic processing of HPLC chromatograms.
 
 To automate your workflow and get accurate results, MOCCA2 features:
- - support for raw data files from Agilent, Shimadzu and Waters
+ - support for text export files from Agilent, Shimadzu and Waters (to read raw vendor formats, use [Peaksel SDK](https://github.com/elsci-io/peaksel-sdk/blob/master/python/doc/mocca-integration.md))
  - automatic baseline correction
  - adaptive peak picking
  - automatic purity checking and peak deconvolution
