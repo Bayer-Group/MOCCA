@@ -4,17 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mocca2"
-version = "0.1.17"
-authors = [
-  { name="Jan Oboril", email="jan.oboril@gmail.com" },
-]
+version = "0.1.18"
+authors = [{ name = "Jan Oboril", email = "jan.oboril@gmail.com" }]
 description = "MOCCA2 is an open-source Python project to analyze HPLC-DAD raw data"
 readme = "readme.md"
 requires-python = ">=3.10"
 classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
 ]
 dependencies = [
   'numpy > 1.20',
@@ -23,7 +21,8 @@ dependencies = [
   'pyyaml > 6.0',
   'pandas > 2.1',
   'matplotlib > 3.6',
-  'pyarrow > 15.0'
+  'pyarrow > 15.0',
+  'rainbow-api > 1.0',
 ]
 
 [project.urls]

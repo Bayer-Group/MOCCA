@@ -1,6 +1,5 @@
 from typing import Literal, Dict, List, Tuple
 
-from importlib import resources as impresources
 import os
 import re
 import numpy as np
@@ -8,14 +7,14 @@ import pandas as pd
 import scipy.io
 
 from mocca2.classes.chromatogram import Chromatogram, Data2D
-from mocca2 import example_data
+from mocca2.example_data.downloader import _example_data_path
 
 
 def check_data_needs_downloading():
     """
     Check if the example data needs to be downloaded.
     """
-    if not os.path.exists(impresources.files(example_data) / "data"):
+    if not _example_data_path().is_dir():
         raise FileNotFoundError(
             "Example data not found. Please run 'python -m mocca2 --download-data' to download the example data."
         )
@@ -29,11 +28,11 @@ def example_1(substract_blank: bool = True) -> Chromatogram:
     """
     check_data_needs_downloading()
 
-    chrom = impresources.files(example_data) / "data/examples/chrom1.arw"
+    chrom = _example_data_path(["examples", "chrom1.arw"])
     if not substract_blank:
         return Chromatogram(str(chrom), name="example_chromatrogram_1")
 
-    blank = impresources.files(example_data) / "data/examples/blank1.arw"
+    blank = _example_data_path(["examples", "blank1.arw"])
     return Chromatogram(str(chrom), str(blank), name="example_chromatrogram_1")
 
 
@@ -45,11 +44,11 @@ def example_2(substract_blank: bool = True) -> Chromatogram:
     """
     check_data_needs_downloading()
 
-    chrom = impresources.files(example_data) / "data/examples/chrom2.arw"
+    chrom = _example_data_path(["examples", "chrom2.arw"])
     if not substract_blank:
         return Chromatogram(str(chrom), name="example_chromatrogram_2")
 
-    blank = impresources.files(example_data) / "data/examples/blank2.arw"
+    blank = _example_data_path(["examples", "blank2.arw"])
     return Chromatogram(str(chrom), str(blank), name="example_chromatrogram_2")
 
 
@@ -61,11 +60,11 @@ def example_3(substract_blank: bool = True) -> Chromatogram:
     """
     check_data_needs_downloading()
 
-    chrom = impresources.files(example_data) / "data/examples/chrom3.arw"
+    chrom = _example_data_path(["examples", "chrom3.arw"])
     if not substract_blank:
         return Chromatogram(str(chrom), name="example_chromatrogram_3")
 
-    blank = impresources.files(example_data) / "data/examples/blank3.arw"
+    blank = _example_data_path(["examples", "blank3.arw"])
     return Chromatogram(str(chrom), str(blank), name="example_chromatrogram_3")
 
 
@@ -89,9 +88,7 @@ def knoevenagel_calibration(
         )
     if which not in ["1", "2"]:
         raise ValueError("which must be one of '1', '2' or 'both'")
-    directory = str(
-        impresources.files(example_data) / ("data/knoevenagel/calibration" + which)
-    )
+    directory = str(_example_data_path(["knoevenagel", "calibration" + which]))
 
     compound_pattern = re.compile(
         r".*_(?P<grad_len>\d+)_(?P<compound>\w+)_(?P<conc>\d+)\.D"
@@ -187,9 +184,7 @@ def knoevenagel(
     if which not in ["ba_ome", "ba_ome_nme2"]:
         raise ValueError("which must be one of 'ba_ome', 'ba_ome_nme2'")
 
-    directory = str(
-        impresources.files(example_data) / f"data/knoevenagel/reaction_{which}"
-    )
+    directory = str(_example_data_path(["knoevenagel", f"reaction_{which}"]))
 
     time_interpolations = {
         "250": np.linspace(0, 3, 1800),
@@ -284,10 +279,10 @@ def cyanation(
     """
     check_data_needs_downloading()
 
-    directory = str(impresources.files(example_data) / "data/cyanation")
+    directory = _example_data_path(["cyanation"])
 
     def filename(name: str) -> str:
-        return os.path.join(directory, f"09072021_{name}.txt")
+        return str(directory / f"09072021_{name}.txt")
 
     # load all the chromatograms
     chromatograms = {}
@@ -330,19 +325,15 @@ def benzaldehyde(substract_blank: bool = True) -> Tuple[Chromatogram, Chromatogr
     """Loads tutorial data published with the original MOCCA package, these contain 1mM and 0.5mM benzaldehyde respectively."""
     check_data_needs_downloading()
 
-    directory = str(impresources.files(example_data) / "data/benzaldehyde")
+    directory = _example_data_path(["benzaldehyde"])
 
     if substract_blank:
-        blank = Chromatogram(os.path.join(directory, "blank.D"))
+        blank = Chromatogram(str(directory / "blank.D"))
     else:
         blank = None
 
-    chrom_1 = Chromatogram(
-        os.path.join(directory, "ba_1.D"), blank, interpolate_blank=True
-    )
-    chrom_2 = Chromatogram(
-        os.path.join(directory, "ba_05.D"), blank, interpolate_blank=True
-    )
+    chrom_1 = Chromatogram(str(directory / "ba_1.D"), blank, interpolate_blank=True)
+    chrom_2 = Chromatogram(str(directory / "ba_05.D"), blank, interpolate_blank=True)
 
     return chrom_1, chrom_2
 
@@ -360,7 +351,7 @@ def diterpene_esters() -> pd.DataFrame:
     """
     check_data_needs_downloading()
 
-    directory = str(impresources.files(example_data) / "data/diterpene_esters")
+    directory = _example_data_path(["diterpene_esters"])
 
     mat = scipy.io.loadmat(os.path.join(directory, "data.mat"))
 

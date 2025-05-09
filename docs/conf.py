@@ -9,7 +9,7 @@
 project = "MOCCA2"
 copyright = "2024, Jan Oboril"
 author = "Jan Oboril"
-release = "0.0.1"
+release = "0.1.18"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

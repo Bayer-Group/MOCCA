@@ -18,3 +18,5 @@ These parsers are all wrapped by `load_data2d() <mocca2.load_data2d>`_ and there
 .. autofunction:: mocca2.parsers.chemstation.parse_chemstation
 
 .. autofunction:: mocca2.parsers.labsolutions.parse_labsolutions   
+
+.. autofunction:: mocca2.parsers.masslynx.parse_masslynx   
